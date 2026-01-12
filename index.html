@@ -7,10 +7,11 @@
 
 <style>
 :root {
-  --jetblue-dark: #003876;
-  --jetblue: #005DAA;
-  --jetblue-light: #4FA9FF;
-  --spotlight-orange: #FF6600;
+  /* JetBlue Tail-inspired colors */
+  --blue-dark: #002b5c;
+  --blue-mid: #005DAA;
+  --blue-light: #4FA9FF;
+  --orange-accent: #FF7F32;
   --glass: rgba(255,255,255,0.08);
   --border: rgba(255,255,255,0.15);
 }
@@ -19,7 +20,7 @@
 body {
   margin: 0;
   font-family: -apple-system, BlinkMacSystemFont, "SF Pro", system-ui, sans-serif;
-  background: radial-gradient(circle at top, #0a2342, #020b18);
+  background: radial-gradient(circle at top, var(--blue-dark), #020b18);
   color: #ffffff;
   overflow-x: hidden;
 }
@@ -30,34 +31,32 @@ header {
   padding: 24px;
   font-size: 1.7rem;
   font-weight: 600;
-  background: var(--jetblue-dark);
-  border-bottom: 2px solid var(--spotlight-orange);
+  background: linear-gradient(135deg, var(--blue-dark), var(--blue-mid));
+  border-bottom: 2px solid var(--orange-accent);
   border-radius: 0 0 20px 20px;
   box-shadow: 0 8px 20px rgba(0,0,0,.5);
   animation: fadeInUp 1s ease forwards;
   opacity: 0;
 }
 
-/* Grid */
+/* Grid for panels */
 .grid {
   display: grid;
   gap: 20px;
   padding: 20px;
   height: calc(100vh - 150px);
   box-sizing: border-box;
-  grid-template-columns: 1fr; /* default: single column for mobile */
+  grid-template-columns: 1fr; /* mobile first: stack vertically */
 }
 
-/* Desktop layout: side-by-side panels */
+/* Desktop: two columns */
 @media (min-width: 768px) {
   .grid {
-    grid-template-columns: 1fr 1fr; /* two columns on tablets/desktops */
+    grid-template-columns: 1fr 1fr;
   }
 }
 
-}
-
-/* Panels */
+/* Panel styling */
 .panel {
   background: linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.01));
   border-radius: 24px;
@@ -86,8 +85,8 @@ iframe {
 footer {
   margin: 0 20px 20px;
   border-radius: 16px;
-  background: linear-gradient(135deg, var(--jetblue), var(--jetblue-light));
-  border-top: 3px solid var(--spotlight-orange);
+  background: linear-gradient(135deg, var(--blue-mid), var(--blue-light));
+  border-top: 3px solid var(--orange-accent);
   padding: 16px 20px;
   text-align: center;
   font-size: 1.2rem;
@@ -113,6 +112,17 @@ footer {
   100% { opacity: 1; transform: translateY(0); }
 }
 
+/* Mobile tweaks */
+@media (max-width: 480px) {
+  header {
+    padding: 16px;
+    font-size: 1.4rem;
+  }
+  footer {
+    padding: 12px 16px;
+    font-size: 1rem;
+  }
+}
 </style>
 </head>
 
@@ -124,18 +134,15 @@ Hello 👋 — Welcome to Johnny’s Live Dashboard
 
 <div class="grid">
 
-  <!-- ADS-B Exchange Flight Map (New England) -->
+  <!-- Random Delta A220 flight -->
   <div class="panel">
-    <iframe 
-      src="https://globe.adsbexchange.com/?icao=&lat=42.5&lng=-71&zoom=6" 
-      loading="lazy">
-    </iframe>
+    <iframe id="flightFrame" loading="lazy"></iframe>
   </div>
 
-  <!-- NOAA Weather Radar -->
+  <!-- NOAA Weather Radar zoomed on New England -->
   <div class="panel">
     <iframe 
-      src="https://radar.weather.gov" 
+      src="https://radar.weather.gov/?extent=41.5,-73.5,44.5,-69.5" 
       loading="lazy">
     </iframe>
   </div>
@@ -145,6 +152,35 @@ Hello 👋 — Welcome to Johnny’s Live Dashboard
 <footer id="verse"></footer>
 
 <script>
+// List of example Delta A220 flights (replace with actual active flights)
+const deltaFlights = [
+  "https://flightaware.com/live/flight/DAL101",
+  "https://flightaware.com/live/flight/DAL102",
+  "https://flightaware.com/live/flight/DAL103",
+  "https://flightaware.com/live/flight/DAL104",
+  "https://flightaware.com/live/flight/DAL105",
+  "https://flightaware.com/live/flight/DAL106",
+  "https://flightaware.com/live/flight/DAL107",
+  "https://flightaware.com/live/flight/DAL108",
+  "https://flightaware.com/live/flight/DAL109",
+  "https://flightaware.com/live/flight/DAL110",
+  "https://flightaware.com/live/flight/DAL111",
+  "https://flightaware.com/live/flight/DAL112",
+  "https://flightaware.com/live/flight/DAL113",
+  "https://flightaware.com/live/flight/DAL114",
+  "https://flightaware.com/live/flight/DAL115",
+  "https://flightaware.com/live/flight/DAL116",
+  "https://flightaware.com/live/flight/DAL117",
+  "https://flightaware.com/live/flight/DAL118",
+  "https://flightaware.com/live/flight/DAL119",
+  "https://flightaware.com/live/flight/DAL120"
+];
+
+// Pick a random flight each page load
+const flightUrl = deltaFlights[Math.floor(Math.random() * deltaFlights.length)];
+document.getElementById("flightFrame").src = flightUrl;
+
+// Rotating Bible verses
 const verses = [
   "“The Lord is my shepherd; I shall not want.” — Psalm 23:1",
   "“For I know the plans I have for you…” — Jeremiah 29:11",
