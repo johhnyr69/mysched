@@ -41,4 +41,72 @@ header {
 
 .panel {
   background: linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,.02));
-  bord
+  border-radius: 20px;
+  box-shadow: 0 20px 40px rgba(0,0,0,.4);
+  overflow: hidden;
+  border: 1px solid var(--border);
+  backdrop-filter: blur(14px);
+}
+
+iframe {
+  width: 100%;
+  height: 100%;
+  border: none;
+}
+
+footer {
+  margin: 0 18px 18px;
+  border-radius: 16px;
+  background: linear-gradient(135deg, var(--jetblue), var(--jetblue-light));
+  padding: 14px 20px;
+  text-align: center;
+  font-size: 1.1rem;
+  font-weight: 500;
+  box-shadow: 0 12px 25px rgba(0,0,0,.4);
+}
+</style>
+</head>
+
+<body>
+
+<header>
+Hello 👋 — Welcome to Johnny’s Live Dashboard
+</header>
+
+<div class="grid">
+
+  <!-- FlightAware Live Traffic -->
+  <div class="panel">
+    <iframe src="https://flightaware.com/live/map"></iframe>
+  </div>
+
+  <!-- NOAA Weather Radar -->
+  <div class="panel">
+    <iframe src="https://radar.weather.gov"></iframe>
+  </div>
+
+</div>
+
+<footer id="verse"></footer>
+
+<script>
+const verses = [
+  "“The Lord is my shepherd; I shall not want.” — Psalm 23:1",
+  "“For I know the plans I have for you…” — Jeremiah 29:11",
+  "“Be still, and know that I am God.” — Psalm 46:10",
+  "“Trust in the Lord with all your heart.” — Proverbs 3:5",
+  "“The Lord will watch over your coming and going.” — Psalm 121:8",
+  "“I can do all things through Christ who strengthens me.” — Philippians 4:13"
+];
+
+function setVerse() {
+  const v = verses[Math.floor(Math.random() * verses.length)];
+  document.getElementById("verse").textContent = v;
+}
+
+setVerse();
+setInterval(setVerse, 60000);
+</script>
+
+</body>
+</html>
