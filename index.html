@@ -7,56 +7,60 @@
 
 <style>
 :root {
-  --blue-dark: #002b5c;
-  --blue-mid: #005DAA;
-  --blue-light: #4FA9FF;
-  --orange-accent: #FF7F32;
-  --glass: rgba(255,255,255,0.08);
-  --border: rgba(255,255,255,0.15);
+  /* Official JetBlue brand colors */
+  --jetblue-primary: #003876;   /* dark blue */
+  --jetblue-mid:     #385E9D;   /* medium blue */
+  --jetblue-light:   #6787B7;   /* light blue accent */
+  --jetblue-navy:    #1B365D;   /* deep navy */
+  --jetblue-accent:  #FF6A13;   /* subtle orange for highlights */
 }
 
+/* Base styles */
 body {
   margin: 0;
   font-family: -apple-system, BlinkMacSystemFont, "SF Pro", system-ui, sans-serif;
-  background: radial-gradient(circle at top, var(--blue-dark), #020b18);
-  color: #fff;
+  background: radial-gradient(circle at top, var(--jetblue-navy), var(--jetblue-primary));
+  color: #ffffff;
   overflow-x: hidden;
 }
 
+/* Header */
 header {
   text-align: center;
   padding: 24px;
   font-size: 1.7rem;
   font-weight: 600;
-  background: linear-gradient(135deg, var(--blue-dark), var(--blue-mid));
-  border-bottom: 2px solid var(--orange-accent);
+  background: linear-gradient(135deg, var(--jetblue-navy), var(--jetblue-primary));
+  border-bottom: 2px solid var(--jetblue-accent);
   border-radius: 0 0 20px 20px;
   box-shadow: 0 8px 20px rgba(0,0,0,.5);
   animation: fadeInUp 1s ease forwards;
   opacity: 0;
 }
 
+/* Grid container */
 .grid {
   display: grid;
   gap: 20px;
   padding: 20px;
   grid-template-columns: 1fr;
-  height: calc(100vh - 150px);
   box-sizing: border-box;
 }
 
+/* Desktop two columns */
 @media (min-width: 768px) {
   .grid {
     grid-template-columns: 1fr 1fr;
   }
 }
 
+/* Panel styling */
 .panel {
-  background: linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.01));
+  background: linear-gradient(180deg, rgba(255,255,255,0.05), rgba(255,255,255,0.01));
   border-radius: 24px;
   box-shadow: 0 20px 40px rgba(0,0,0,.4);
   overflow: hidden;
-  border: 1px solid var(--border);
+  border: 1px solid rgba(255,255,255,0.15);
   backdrop-filter: blur(14px);
   transition: transform 0.3s, box-shadow 0.3s;
   animation: floatFade 2s ease infinite alternate, fadeIn 1s ease forwards;
@@ -65,6 +69,7 @@ header {
   flex-direction: column;
   align-items: center;
   justify-content: center;
+  padding: 16px;
 }
 
 .panel:hover {
@@ -72,6 +77,7 @@ header {
   box-shadow: 0 30px 50px rgba(0,0,0,.5);
 }
 
+/* Linktree buttons */
 .link-button {
   margin: 10px 0;
   padding: 14px 24px;
@@ -81,16 +87,19 @@ header {
   text-decoration: none;
   font-weight: 600;
   color: #fff;
-  background: var(--blue-mid);
+  background: var(--jetblue-mid);
   border-radius: 12px;
-  transition: background 0.3s, transform 0.2s;
+  transition: background 0.3s, transform 0.2s, box-shadow 0.2s;
+  box-shadow: 0 4px 10px rgba(0,0,0,.2);
 }
 
 .link-button:hover {
-  background: var(--blue-light);
+  background: var(--jetblue-light);
   transform: scale(1.05);
+  box-shadow: 0 6px 15px rgba(0,0,0,.3);
 }
 
+/* Iframes for radar / maps */
 iframe {
   width: 100%;
   height: 100%;
@@ -98,11 +107,12 @@ iframe {
   border-radius: 24px;
 }
 
+/* Footer */
 footer {
   margin: 0 20px 20px;
   border-radius: 16px;
-  background: linear-gradient(135deg, var(--blue-mid), var(--blue-light));
-  border-top: 3px solid var(--orange-accent);
+  background: linear-gradient(135deg, var(--jetblue-mid), var(--jetblue-light));
+  border-top: 3px solid var(--jetblue-accent);
   padding: 16px 20px;
   text-align: center;
   font-size: 1.2rem;
@@ -112,6 +122,7 @@ footer {
   opacity: 0;
 }
 
+/* Animations */
 @keyframes floatFade {
   0% { transform: translateY(0px); }
   100% { transform: translateY(-6px); }
@@ -127,6 +138,7 @@ footer {
   100% { opacity: 1; transform: translateY(0); }
 }
 
+/* Mobile tweaks */
 @media (max-width: 480px) {
   header {
     padding: 16px;
@@ -162,6 +174,28 @@ Hello 👋 — Welcome to Johnny’s Dashboard
     <iframe 
       src="https://radar.weather.gov/?extent=41.5,-73.5,44.5,-69.5" 
       loading="lazy">
+    </iframe>
+  </div>
+
+  <!-- OpenSeaMap centered on Branford Harbor, CT -->
+  <div class="panel">
+    <iframe 
+      src="https://map.openseamap.org/?zoom=13&lat=41.2756&lon=-72.8006&layers=BFTFFTT" 
+      loading="lazy"
+      style="height:400px;">
+    </iframe>
+  </div>
+
+  <!-- NOAA Buoy / Marine Weather panel -->
+  <div class="panel">
+    <h3>Marine Weather & Buoy Reports</h3>
+    <p><a href="https://www.ndbc.noaa.gov/station_page.php?station=44025" target="_blank" style="color:var(--jetblue-light); text-decoration:underline;">
+      Branford Harbor Buoy (NOAA)
+    </a></p>
+    <iframe
+      src="https://www.ndbc.noaa.gov/station_page.php?station=44025" 
+      loading="lazy"
+      style="height:300px;">
     </iframe>
   </div>
 
