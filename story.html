@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Private Story 😏</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+body {
+  background:#0b0b0b;
+  color:#fff;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  height:100vh;
+  overflow:hidden;
+  flex-direction:column;
+}
+
+#gate, #app {
+  text-align:center;
+}
+
+input, button {
+  padding:12px 18px;
+  font-size:18px;
+  border-radius:10px;
+  border:none;
+  outline:none;
+}
+
+button {
+  background:#ff3b6a;
+  color:white;
+  cursor:pointer;
+  margin-top:15px;
+}
+
+button:hover {
+  background:#ff5c85;
+}
+
+#countdown {
+  font-size:32px;
+  margin-bottom:20px;
+}
+
+.card {
+  width:400px;
+  min-height:220px;
+  background:linear-gradient(135deg,#ff3b6a,#ff7a9c);
+  border-radius:18px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:22px;
+  padding:20px;
+  box-shadow:0 0 30px rgba(255,80,120,0.4);
+  margin:20px auto;
+  text-align:center;
+}
+</style>
+</head>
+
+<body>
+
+<div id="gate">
+  <h2>Enter Password</h2>
+  <input id="pw" type="password" placeholder="•••••">
+  <br>
+  <button onclick="unlock()">Unlock</button>
+</div>
+
+<div id="app" style="display:none;">
+  <div id="countdown"></div>
+
+  <div class="card" id="card">✨</div>
+
+  <button onclick="drink()">Drink</button>
+</div>
+
+<script>
+// --- PASSWORD (obfuscated) ---
+const secret = "Njk="; // 69 in base64
+
+function unlock() {
+  const input = document.getElementById("pw").value;
+  if (btoa(input) === secret) {
+    document.getElementById("gate").style.display = "none";
+    document.getElementById("app").style.display = "block";
+    startCountdown();
+  } else {
+    alert("Incorrect password!");
+  }
+}
+
+// --- Pre-written prose stories ---
+const stories = [
+  "We head to the shower where you pee on me 💦, then we clean your butt 🍑 to get ready for anal fingering 👈.",
+  "I start by teasing your butt 🍑, then insert a toy 🍆🧸 slowly while you watch yourself cum 😛💦.",
+  "We lie down together, you spit on me 😏💦 before I slide my fingers 🍑👉 inside your ass, then we finish with hardcore sex 🔥💥.",
+  "You pee in a cup 🥤💦 and drink it while I play with your butt 🍑, then we enjoy mutual masturbation 🤲💦.",
+  "I peg you 🍆🍑 gently, then worship your ass 👅🍑 before we finish with a golden shower 💛🚿 together."
+];
+
+let currentStory;
+
+// Countdown
+function startCountdown() {
+  let t = 5;
+  const c = document.getElementById("countdown");
+  c.textContent = "Get ready… " + t;
+  const timer = setInterval(()=>{
+    t--;
+    if(t <= 0){
+      clearInterval(timer);
+      c.textContent = "";
+      pickStory();
+    } else {
+      c.textContent = "Get ready… " + t;
+    }
+  },1000);
+}
+
+// Pick a random story
+function pickStory(){
+  currentStory = stories[Math.floor(Math.random()*stories.length)];
+  document.getElementById("card").textContent = currentStory;
+}
+
+// Drink button
+function drink(){
+  document.getElementById("card").textContent = "Take a shot 🥃";
+}
+</script>
+
+</body>
+</html>
