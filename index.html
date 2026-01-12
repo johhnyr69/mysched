@@ -7,12 +7,12 @@
 
 <style>
 :root {
-  /* Official JetBlue brand colors */
-  --jetblue-primary: #003876;   /* dark blue */
-  --jetblue-mid:     #385E9D;   /* medium blue */
-  --jetblue-light:   #6787B7;   /* light blue accent */
-  --jetblue-navy:    #1B365D;   /* deep navy */
-  --jetblue-accent:  #FF6A13;   /* subtle orange for highlights */
+  /* JetBlue brand colors */
+  --jetblue-primary: #003876;
+  --jetblue-mid:     #385E9D;
+  --jetblue-light:   #6787B7;
+  --jetblue-navy:    #1B365D;
+  --jetblue-accent:  #FF6A13;
 }
 
 /* Base styles */
@@ -20,7 +20,7 @@ body {
   margin: 0;
   font-family: -apple-system, BlinkMacSystemFont, "SF Pro", system-ui, sans-serif;
   background: radial-gradient(circle at top, var(--jetblue-navy), var(--jetblue-primary));
-  color: #ffffff;
+  color: #fff;
   overflow-x: hidden;
 }
 
@@ -70,6 +70,7 @@ header {
   align-items: center;
   justify-content: center;
   padding: 16px;
+  height: 450px; /* Slightly taller panels */
 }
 
 .panel:hover {
@@ -99,7 +100,7 @@ header {
   box-shadow: 0 6px 15px rgba(0,0,0,.3);
 }
 
-/* Iframes for radar / maps */
+/* Iframes for radar / maps / forecast */
 iframe {
   width: 100%;
   height: 100%;
@@ -182,20 +183,16 @@ Hello 👋 — Welcome to Johnny’s Dashboard
     <iframe 
       src="https://map.openseamap.org/?zoom=13&lat=41.2756&lon=-72.8006&layers=BFTFFTT" 
       loading="lazy"
-      style="height:400px;">
+      style="height:450px;">
     </iframe>
   </div>
 
-  <!-- NOAA Buoy / Marine Weather panel -->
+  <!-- NWS New Haven / Branford Forecast -->
   <div class="panel">
-    <h3>Marine Weather & Buoy Reports</h3>
-    <p><a href="https://www.ndbc.noaa.gov/station_page.php?station=44025" target="_blank" style="color:var(--jetblue-light); text-decoration:underline;">
-      Branford Harbor Buoy (NOAA)
-    </a></p>
     <iframe
-      src="https://www.ndbc.noaa.gov/station_page.php?station=44025" 
+      src="https://forecast.weather.gov/MapClick.php?lat=41.320998&lon=-72.922053&textField1=41.320998&textField2=-72.922053&site=okx"
       loading="lazy"
-      style="height:300px;">
+      style="height:450px;">
     </iframe>
   </div>
 
