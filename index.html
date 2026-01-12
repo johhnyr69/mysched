@@ -1,113 +1,93 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<title>Welcome</title>
+<meta charset="UTF-8">
+<title>Johnny’s Live Dashboard</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
 <style>
-  html, body {
-    height: 100%;
-    margin: 0;
-    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
-  }
+body {
+  margin: 0;
+  font-family: system-ui, sans-serif;
+  background: #0b1220;
+  color: #ffffff;
+}
 
-  .hero {
-    position: relative;
-    height: 100%;
-    width: 100%;
-    background: linear-gradient(#87c9ff, #e9f6ff);
-    overflow: hidden;
-  }
+header {
+  text-align: center;
+  padding: 20px;
+  background: linear-gradient(135deg,#162447,#1f4068);
+  font-size: 1.5rem;
+  font-weight: 600;
+}
 
-  .welcome {
-    position: absolute;
-    inset: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    text-align: center;
-    backdrop-filter: blur(2px);
-    background: rgba(0,0,0,0.25);
-    color: white;
-    z-index: 2;
-  }
+.grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  height: calc(100vh - 140px);
+}
 
-  .welcome h1 {
-    font-size: clamp(3rem, 6vw, 6rem);
-    letter-spacing: 0.1em;
-    margin: 0;
-  }
+.panel {
+  border: 1px solid rgba(255,255,255,.1);
+}
 
-  .welcome p {
-    font-size: 1.3rem;
-    opacity: 0.85;
-    margin-top: 12px;
-  }
+iframe {
+  width: 100%;
+  height: 100%;
+  border: none;
+}
 
-  svg {
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    bottom: -10%;
-    left: 0;
-  }
+footer {
+  text-align: center;
+  padding: 15px;
+  font-size: 1.1rem;
+  background: #111;
+  border-top: 1px solid rgba(255,255,255,.1);
+}
 </style>
 </head>
+
 <body>
 
-<div class="hero">
+<header>
+Hello 👋 — Welcome to Johnny’s Live Dashboard
+</header>
 
-  <div class="welcome">
-    <div>
-      <h1>WELCOME</h1>
-      <p></p>
-    </div>
+<div class="grid">
+
+  <!-- Flight Radar -->
+  <div class="panel">
+    <iframe src="https://www.flightradar24.com/simple?lat=39&lon=-98&z=4"></iframe>
   </div>
 
-  <!-- Stylized JetBlue A320 -->
-  <svg viewBox="0 0 1200 500" preserveAspectRatio="xMidYMid meet">
-    <!-- plane body -->
-    <ellipse cx="600" cy="260" rx="420" ry="60" fill="#ffffff"/>
-    <!-- nose -->
-    <ellipse cx="180" cy="260" rx="90" ry="55" fill="#ffffff"/>
-    <!-- cockpit -->
-    <ellipse cx="155" cy="245" rx="30" ry="20" fill="#1c4fa1"/>
-
-    <!-- tail -->
-    <polygon points="930,260 1020,170 1040,180 980,260" fill="#1c4fa1"/>
-    <polygon points="930,260 1020,350 1040,340 980,260" fill="#1c4fa1"/>
-
-    <!-- wings -->
-    <polygon points="520,260 700,350 740,350 620,260" fill="#d6e6ff"/>
-    <polygon points="520,260 700,170 740,170 620,260" fill="#d6e6ff"/>
-
-    <!-- engines -->
-    <ellipse cx="600" cy="320" rx="35" ry="18" fill="#1c4fa1"/>
-    <ellipse cx="650" cy="320" rx="35" ry="18" fill="#1c4fa1"/>
-
-    <!-- jetblue stripe -->
-    <rect x="250" y="260" width="600" height="18" fill="#1c4fa1"/>
-    <text x="520" y="275" fill="white" font-size="22" font-weight="bold">jetBlue</text>
-
-    <!-- windows -->
-    <g fill="#1c4fa1">
-      <circle cx="300" cy="250" r="6"/>
-      <circle cx="340" cy="250" r="6"/>
-      <circle cx="380" cy="250" r="6"/>
-      <circle cx="420" cy="250" r="6"/>
-      <circle cx="460" cy="250" r="6"/>
-      <circle cx="500" cy="250" r="6"/>
-      <circle cx="540" cy="250" r="6"/>
-      <circle cx="580" cy="250" r="6"/>
-      <circle cx="620" cy="250" r="6"/>
-      <circle cx="660" cy="250" r="6"/>
-      <circle cx="700" cy="250" r="6"/>
-      <circle cx="740" cy="250" r="6"/>
-      <circle cx="780" cy="250" r="6"/>
-      <circle cx="820" cy="250" r="6"/>
-    </g>
-  </svg>
+  <!-- NOAA Weather Radar -->
+  <div class="panel">
+    <iframe src="https://radar.weather.gov"></iframe>
+  </div>
 
 </div>
+
+<footer id="verse">
+</footer>
+
+<script>
+const verses = [
+  "“The Lord is my shepherd; I shall not want.” — Psalm 23:1",
+  "“For I know the plans I have for you…” — Jeremiah 29:11",
+  "“Be still, and know that I am God.” — Psalm 46:10",
+  "“Trust in the Lord with all your heart.” — Proverbs 3:5",
+  "“The Lord will watch over your coming and going.” — Psalm 121:8",
+  "“I can do all things through Christ who strengthens me.” — Philippians 4:13"
+];
+
+function setVerse() {
+  const v = verses[Math.floor(Math.random() * verses.length)];
+  document.getElementById("verse").textContent = v;
+}
+
+setVerse();
+setInterval(setVerse, 60000); // rotate every minute
+</script>
 
 </body>
 </html>
