@@ -2,95 +2,43 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Live Dashboard</title>
+<title>Johnny’s Live Dashboard</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
 <style>
+:root {
+  --jetblue-dark: #003876;
+  --jetblue: #005DAA;
+  --jetblue-light: #4fa9ff;
+  --glass: rgba(255,255,255,0.08);
+  --border: rgba(255,255,255,0.15);
+}
+
 body {
   margin: 0;
-  font-family: system-ui, sans-serif;
-  background: #0b1220;
-  color: #ffffff;
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro", system-ui, sans-serif;
+  background: radial-gradient(circle at top, #0a2342, #020b18);
+  color: #fff;
 }
 
 header {
   text-align: center;
-  padding: 20px;
-  background: linear-gradient(135deg,#162447,#1f4068);
-  font-size: 1.5rem;
+  padding: 24px;
+  font-size: 1.7rem;
   font-weight: 600;
+  background: linear-gradient(135deg, var(--jetblue-dark), var(--jetblue));
+  border-bottom: 1px solid var(--border);
 }
 
 .grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  height: calc(100vh - 140px);
+  gap: 18px;
+  padding: 18px;
+  height: calc(100vh - 150px);
+  box-sizing: border-box;
 }
 
 .panel {
-  border: 1px solid rgba(255,255,255,.1);
-}
-
-iframe {
-  width: 100%;
-  height: 100%;
-  border: none;
-}
-
-footer {
-  text-align: center;
-  padding: 15px;
-  font-size: 1.1rem;
-  background: #111;
-  border-top: 1px solid rgba(255,255,255,.1);
-}
-</style>
-</head>
-
-<body>
-
-<header>
-Hello 👋 — Welcome to Evans Live Dashboard
-</header>
-
-<div class="grid">
-
-  <!-- Flight Radar -->
-   <div class="panel">
-    <iframe 
-      src="https://flightaware.com/live/map" 
-      loading="lazy">
-    </iframe>
-  </div>
-
-  <!-- NOAA Weather Radar -->
-  <div class="panel">
-    <iframe src="https://radar.weather.gov"></iframe>
-  </div>
-
-</div>
-
-<footer id="verse">
-</footer>
-
-<script>
-const verses = [
-  "“The Lord is my shepherd; I shall not want.” — Psalm 23:1",
-  "“For I know the plans I have for you…” — Jeremiah 29:11",
-  "“Be still, and know that I am God.” — Psalm 46:10",
-  "“Trust in the Lord with all your heart.” — Proverbs 3:5",
-  "“The Lord will watch over your coming and going.” — Psalm 121:8",
-  "“I can do all things through Christ who strengthens me.” — Philippians 4:13"
-];
-
-function setVerse() {
-  const v = verses[Math.floor(Math.random() * verses.length)];
-  document.getElementById("verse").textContent = v;
-}
-
-setVerse();
-setInterval(setVerse, 60000); // rotate every minute
-</script>
-
-</body>
-</html>
+  background: linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,.02));
+  bord
