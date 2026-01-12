@@ -41,11 +41,20 @@ header {
 /* Grid */
 .grid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
   gap: 20px;
   padding: 20px;
   height: calc(100vh - 150px);
   box-sizing: border-box;
+  grid-template-columns: 1fr; /* default: single column for mobile */
+}
+
+/* Desktop layout: side-by-side panels */
+@media (min-width: 768px) {
+  .grid {
+    grid-template-columns: 1fr 1fr; /* two columns on tablets/desktops */
+  }
+}
+
 }
 
 /* Panels */
