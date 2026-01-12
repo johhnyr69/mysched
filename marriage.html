@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Private Fun</title>
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    background-color: #111;
+    color: #fff;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    text-align: center;
+  }
+  .sex-act {
+    font-size: 2rem;
+    margin: 20px;
+  }
+  button {
+    padding: 10px 20px;
+    font-size: 1.2rem;
+    cursor: pointer;
+    border: none;
+    border-radius: 8px;
+    background-color: #ff3366;
+    color: white;
+    transition: background 0.3s;
+  }
+  button:hover {
+    background-color: #ff6699;
+  }
+</style>
+</head>
+<body>
+
+<h1>Let’s Get Naughty 😏</h1>
+<div class="sex-act" id="sexAct"></div>
+<button onclick="pickRandomAct()">Try Another</button>
+
+<script>
+const PASSWORD = "YourSecretPassword"; // change this to your secret password
+
+// Prompt for password
+let attempt = prompt("Enter password to unlock the page:");
+if(attempt !== PASSWORD) {
+  alert("Incorrect password. Access denied!");
+  document.body.innerHTML = "<h2>Access Denied 🔒</h2>";
+  throw new Error("Unauthorized access");
+}
+
+const acts = [
+  "Swallow Cum 😛💦",
+  "Finger Your Butt 🍑👉",
+  "Finger My Butt 🍑👈",
+  "Big Toy My Butt 🍆🧸",
+  "Eat Ass 🍑👅",
+  "Pee in Mouth 🚰👄",
+  "Pee on Floor 🚿💦",
+  "Pee in Cup 🥤💦",
+  "Pee in Pants 👖💦",
+  "Hardcore Sex 🔥💥"
+];
+
+function pickRandomAct() {
+  const randomIndex = Math.floor(Math.random() * acts.length);
+  document.getElementById("sexAct").textContent = acts[randomIndex];
+}
+
+// Pick one on page load
+pickRandomAct();
+</script>
+
+</body>
+</html>
