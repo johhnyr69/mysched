@@ -7,9 +7,7 @@
 
 <style>
 :root {
-  --jetblue-dark: #003876;
-  --jetblue: #005DAA;
-  --jetblue-light: #4fa9ff;
+  --spotlight-orange: #ff6600; /* JetBlue "Spotlight" accent */
   --glass: rgba(255,255,255,0.08);
   --border: rgba(255,255,255,0.15);
 }
@@ -26,7 +24,7 @@ header {
   padding: 24px;
   font-size: 1.7rem;
   font-weight: 600;
-  background: linear-gradient(135deg, var(--jetblue-dark), var(--jetblue));
+  background: linear-gradient(135deg, #1a1a1a, var(--spotlight-orange));
   border-bottom: 1px solid var(--border);
 }
 
@@ -57,7 +55,7 @@ iframe {
 footer {
   margin: 0 18px 18px;
   border-radius: 16px;
-  background: linear-gradient(135deg, var(--jetblue), var(--jetblue-light));
+  background: linear-gradient(135deg, var(--spotlight-orange), #ff9933);
   padding: 14px 20px;
   text-align: center;
   font-size: 1.1rem;
@@ -75,14 +73,20 @@ Hello 👋 — Welcome to Johnny’s Live Dashboard
 
 <div class="grid">
 
-  <!-- FlightAware Live Traffic -->
+  <!-- ADS-B Exchange Flight Map (New England) -->
   <div class="panel">
-    <iframe src="https://flightaware.com/live/map"></iframe>
+    <iframe 
+      src="https://globe.adsbexchange.com/?icao=&lat=42.5&lng=-71&zoom=6" 
+      loading="lazy">
+    </iframe>
   </div>
 
   <!-- NOAA Weather Radar -->
   <div class="panel">
-    <iframe src="https://radar.weather.gov"></iframe>
+    <iframe 
+      src="https://radar.weather.gov" 
+      loading="lazy">
+    </iframe>
   </div>
 
 </div>
@@ -105,7 +109,7 @@ function setVerse() {
 }
 
 setVerse();
-setInterval(setVerse, 60000);
+setInterval(setVerse, 60000); // rotate every minute
 </script>
 
 </body>
