@@ -15,6 +15,7 @@ body {
   align-items:center;
   height:100vh;
   overflow:hidden;
+  flex-direction:column;
 }
 
 #gate, #app {
@@ -46,8 +47,8 @@ button:hover {
 }
 
 .card {
-  width:320px;
-  height:240px;
+  width:350px;
+  height:200px;
   perspective:1000px;
   margin:20px auto;
 }
@@ -60,7 +61,7 @@ button:hover {
   position:relative;
 }
 
-.card.flip .card-inner {
+.card-inner.flip {
   transform:rotateY(180deg);
 }
 
@@ -103,13 +104,13 @@ button:hover {
   <div id="countdown"></div>
 
   <div class="card" id="card">
-    <div class="card-inner">
+    <div class="card-inner" id="cardInner">
       <div class="face front" id="front"></div>
       <div class="face back" id="back">✨</div>
     </div>
   </div>
 
-  <button onclick="next()">Next</button>
+  <button onclick="next()">I'd Rather Not…</button>
 </div>
 
 <script>
@@ -128,7 +129,7 @@ function unlock() {
   }
 }
 
-// --- Sex acts with emojis ---
+// --- Sex acts with butt/pee/cum theme ---
 const items = [
   {text:"Swallow Cum 😛💦", icon:"😛💦"},
   {text:"Finger Your Butt 🍑👉", icon:"🍑👉"},
@@ -139,7 +140,13 @@ const items = [
   {text:"Pee on Floor 🚿💦", icon:"🚿💦"},
   {text:"Pee in Cup 🥤💦", icon:"🥤💦"},
   {text:"Pee in Pants 👖💦", icon:"👖💦"},
-  {text:"Hardcore Sex 🔥💥", icon:"🔥💥"}
+  {text:"Hardcore Sex 🔥💥", icon:"🔥💥"},
+  // New acts fitting the theme
+  {text:"Butt Plug Play 🍑🔌", icon:"🍑🔌"},
+  {text:"Cum on Butt 🍑💦", icon:"🍑💦"},
+  {text:"Anal Massage 🍑💆‍♂️", icon:"🍑💆‍♂️"},
+  {text:"Golden Shower 💛🚿", icon:"💛🚿"},
+  {text:"Mutual Cum 🤲💦", icon:"🤲💦"}
 ];
 
 let current;
@@ -154,25 +161,35 @@ function startCountdown() {
     if(t <= 0){
       clearInterval(timer);
       c.textContent = "";
-      draw();
+      flipAndDraw();
     } else {
       c.textContent = "Get ready… " + t;
     }
   },1000);
 }
 
-// Pick random
-function draw(){
+// Pick random act
+function pickRandomAct(){
   current = items[Math.floor(Math.random()*items.length)];
   document.getElementById("front").textContent = current.text;
   document.getElementById("back").textContent = current.icon;
-  document.getElementById("card").classList.remove("flip");
 }
 
+// Flip card once and show act
+function flipAndDraw(){
+  pickRandomAct();
+  const cardInner = document.getElementById("cardInner");
+  cardInner.classList.add("flip");
+}
+
+// "I'd Rather Not..." button
 function next(){
-  const card = document.getElementById("card");
-  card.classList.add("flip");
-  setTimeout(draw,800);
+  const cardInner = document.getElementById("cardInner");
+  cardInner.classList.remove("flip");
+  setTimeout(() => {
+    pickRandomAct();
+    cardInner.classList.add("flip");
+  }, 100); // small delay for smooth flip
 }
 </script>
 
