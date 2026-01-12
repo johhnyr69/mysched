@@ -88,4 +88,67 @@ const secret = "Njk="; // 69 in base64
 function unlock() {
   const input = document.getElementById("pw").value;
   if (btoa(input) === secret) {
-    d
+    document.getElementById("gate").style.display = "none";
+    document.getElementById("app").style.display = "block";
+    startCountdown();
+  } else {
+    alert("Incorrect password!");
+  }
+}
+
+// --- Pre-written descriptive stories ---
+const stories = [
+  `We start slowly, exploring each other's bodies. Your butt 🍑 is the center of attention as I tease and finger it 🍑👉, enjoying every gasp you make. Then I introduce a toy 🍆🧸, pressing gently inside while you writhe in pleasure, the intensity building with each moment.
+
+The scene moves to the shower 🚿, where water mixes with your excitement. You pee on me 💦, moaning softly, and I clean your butt 🍑 to prepare for a deeper connection. Finally, we end with anal fingering 👈 and hardcore sex 🔥💥, both of us completely lost in the sensation.`,
+
+  `We lie together on the bed, teasing and exploring. I start with your butt 🍑, massaging it gently before sliding my fingers 🍑👈 inside. You respond with moans and soft gasps, and I add a toy 🍆🧸 to heighten your pleasure. The sensations build, and soon you're ready for more.
+
+We take turns exploring each other's limits. You spit on me 😏💦, adding an intimate edge, then I guide your cum 😛💦 to mix with the play. Finally, mutual masturbation 🤲💦 leads us to a shared, explosive climax, leaving us both breathless and satisfied.`,
+
+  `The shower becomes our playground 🚿. You pee in my mouth 🚰👄, the warmth shocking yet exciting. I guide your hands while massaging your butt 🍑, prepping you for anal exploration. Your body trembles with anticipation, and I continue teasing every sensitive spot 🍑😉.
+
+Once the tension peaks, I slide my fingers 🍑👈 in deeper while adding subtle toys 🍆🧸. Each motion brings us closer, your moans mixing with the sound of water. We finish with hardcore sex 🔥💥, the pleasure building and releasing in waves, leaving us both exhilarated.`,
+
+  `On the couch, I tease your butt 🍑, exploring every curve with my fingers 🍑👉. You respond with soft gasps, and I introduce a second layer of pleasure with a toy 🍆🧸. The room fills with moans as we experiment with different positions, always focusing on your pleasure.
+
+We transition to the bed, where you cum 😛💦 from the stimulation. I continue teasing your ass 🍑👅, then guide you through anal massage 🍑💆‍♂️. Golden showers 💛🚿 and mutual cum 🤲💦 add playful intimacy, leaving us both flushed and deeply connected.`,
+
+  `We begin gently, fingers exploring your butt 🍑👈 while teasing your most sensitive areas. A toy 🍆🧸 is slowly introduced, building anticipation. The excitement grows as you moan and writhe beneath me, the sensations intense and electric.
+
+Later, we experiment with watersports 🚰💦, your pee adding an extra thrill. I guide you through anal teasing 🍑😉 and ass-to-mouth 🍑👄, each step deliberate. The session ends with sloppy blowjobs 😛💦 and cum on butt 🍑💦, a shared climax that leaves us both breathless and grinning.`
+];
+
+let currentStory;
+
+// Countdown
+function startCountdown() {
+  let t = 5;
+  const c = document.getElementById("countdown");
+  c.textContent = "Get ready… " + t;
+  const timer = setInterval(()=>{
+    t--;
+    if(t <= 0){
+      clearInterval(timer);
+      c.textContent = "";
+      pickStory();
+    } else {
+      c.textContent = "Get ready… " + t;
+    }
+  },1000);
+}
+
+// Pick a random story
+function pickStory(){
+  currentStory = stories[Math.floor(Math.random()*stories.length)];
+  document.getElementById("card").textContent = currentStory;
+}
+
+// Drink button
+function drink(){
+  document.getElementById("card").textContent = "Take a shot 🥃";
+}
+</script>
+
+</body>
+</html>
