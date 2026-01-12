@@ -2,76 +2,178 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
+<title>Private Fun 😏</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Private Fun</title>
+
 <style>
-  body {
-    font-family: Arial, sans-serif;
-    background-color: #111;
-    color: #fff;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-    text-align: center;
-  }
-  .sex-act {
-    font-size: 2rem;
-    margin: 20px;
-  }
-  button {
-    padding: 10px 20px;
-    font-size: 1.2rem;
-    cursor: pointer;
-    border: none;
-    border-radius: 8px;
-    background-color: #ff3366;
-    color: white;
-    transition: background 0.3s;
-  }
-  button:hover {
-    background-color: #ff6699;
-  }
+body {
+  background:#0b0b0b;
+  color:#fff;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  height:100vh;
+  overflow:hidden;
+}
+
+#gate, #app {
+  text-align:center;
+}
+
+input, button {
+  padding:12px 18px;
+  font-size:18px;
+  border-radius:10px;
+  border:none;
+  outline:none;
+}
+
+button {
+  background:#ff3b6a;
+  color:white;
+  cursor:pointer;
+  margin-top:15px;
+}
+
+button:hover {
+  background:#ff5c85;
+}
+
+#countdown {
+  font-size:32px;
+  margin-bottom:20px;
+}
+
+.card {
+  width:320px;
+  height:240px;
+  perspective:1000px;
+  margin:20px auto;
+}
+
+.card-inner {
+  width:100%;
+  height:100%;
+  transition:transform 0.8s;
+  transform-style:preserve-3d;
+  position:relative;
+}
+
+.card.flip .card-inner {
+  transform:rotateY(180deg);
+}
+
+.face {
+  position:absolute;
+  width:100%;
+  height:100%;
+  backface-visibility:hidden;
+  border-radius:18px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:28px;
+  padding:20px;
+  box-shadow:0 0 30px rgba(255,80,120,0.4);
+}
+
+.front {
+  background:linear-gradient(135deg,#ff3b6a,#ff7a9c);
+}
+
+.back {
+  background:linear-gradient(135deg,#222,#000);
+  transform:rotateY(180deg);
+  font-size:36px;
+}
 </style>
 </head>
+
 <body>
 
-<h1>Let’s Get Naughty 😏</h1>
-<div class="sex-act" id="sexAct"></div>
-<button onclick="pickRandomAct()">Try Another</button>
+<div id="gate">
+  <h2>Enter Password</h2>
+  <input id="pw" type="password" placeholder="•••••">
+  <br>
+  <button onclick="unlock()">Unlock</button>
+</div>
+
+<div id="app" style="display:none;">
+  <div id="countdown"></div>
+
+  <div class="card" id="card">
+    <div class="card-inner">
+      <div class="face front" id="front"></div>
+      <div class="face back" id="back">✨</div>
+    </div>
+  </div>
+
+  <button onclick="next()">Next</button>
+</div>
 
 <script>
-const PASSWORD = "69"; // change this to your secret password
+// --- PASSWORD (obfuscated) ---
+// "69" encoded in base64
+const secret = "Njk=";
 
-// Prompt for password
-let attempt = prompt("Enter password to unlock the page:");
-if(attempt !== PASSWORD) {
-  alert("Incorrect password. Access denied!");
-  document.body.innerHTML = "<h2>Access Denied 🔒</h2>";
-  throw new Error("Unauthorized access");
+function unlock() {
+  const input = document.getElementById("pw").value;
+  if (btoa(input) === secret) {
+    document.getElementById("gate").style.display = "none";
+    document.getElementById("app").style.display = "block";
+    startCountdown();
+  } else {
+    alert("Incorrect password!");
+  }
 }
 
-const acts = [
-  "Swallow Cum 😛💦",
-  "Finger Your Butt 🍑👉",
-  "Finger My Butt 🍑👈",
-  "Big Toy My Butt 🍆🧸",
-  "Eat Ass 🍑👅",
-  "Pee in Mouth 🚰👄",
-  "Pee on Floor 🚿💦",
-  "Pee in Cup 🥤💦",
-  "Pee in Pants 👖💦",
-  "Hardcore Sex 🔥💥"
+// --- Sex acts with emojis ---
+const items = [
+  {text:"Swallow Cum 😛💦", icon:"😛💦"},
+  {text:"Finger Your Butt 🍑👉", icon:"🍑👉"},
+  {text:"Finger My Butt 🍑👈", icon:"🍑👈"},
+  {text:"Big Toy My Butt 🍆🧸", icon:"🍆🧸"},
+  {text:"Eat Ass 🍑👅", icon:"🍑👅"},
+  {text:"Pee in Mouth 🚰👄", icon:"🚰👄"},
+  {text:"Pee on Floor 🚿💦", icon:"🚿💦"},
+  {text:"Pee in Cup 🥤💦", icon:"🥤💦"},
+  {text:"Pee in Pants 👖💦", icon:"👖💦"},
+  {text:"Hardcore Sex 🔥💥", icon:"🔥💥"}
 ];
 
-function pickRandomAct() {
-  const randomIndex = Math.floor(Math.random() * acts.length);
-  document.getElementById("sexAct").textContent = acts[randomIndex];
+let current;
+
+// Countdown
+function startCountdown() {
+  let t = 5;
+  const c = document.getElementById("countdown");
+  c.textContent = "Get ready… " + t;
+  const timer = setInterval(()=>{
+    t--;
+    if(t <= 0){
+      clearInterval(timer);
+      c.textContent = "";
+      draw();
+    } else {
+      c.textContent = "Get ready… " + t;
+    }
+  },1000);
 }
 
-// Pick one on page load
-pickRandomAct();
+// Pick random
+function draw(){
+  current = items[Math.floor(Math.random()*items.length)];
+  document.getElementById("front").textContent = current.text;
+  document.getElementById("back").textContent = current.icon;
+  document.getElementById("card").classList.remove("flip");
+}
+
+function next(){
+  const card = document.getElementById("card");
+  card.classList.add("flip");
+  setTimeout(draw,800);
+}
 </script>
 
 </body>
