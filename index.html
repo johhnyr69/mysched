@@ -2,153 +2,91 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Johnny’s Dashboard</title>
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Capt Thrams Dashboard</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <style>
-:root {
-  /* JetBlue brand colors */
-  --jetblue-primary: #003876;
-  --jetblue-mid:     #385E9D;
-  --jetblue-light:   #6787B7;
-  --jetblue-navy:    #1B365D;
-  --jetblue-accent:  #FF6A13;
+:root{
+  --jb-blue:#2aa7df;
+  --jb-light:#eaf6fd;
+  --jb-dark:#0c4a6e;
 }
 
-/* Base styles */
-body {
-  margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, "SF Pro", system-ui, sans-serif;
-  background: radial-gradient(circle at top, var(--jetblue-navy), var(--jetblue-primary));
-  color: #fff;
-  overflow-x: hidden;
+body{
+  margin:0;
+  background:linear-gradient(180deg,#f4fbff,#dff2fb);
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+  color:#06324a;
 }
 
-/* Header */
-header {
-  text-align: center;
-  padding: 24px;
-  font-size: 1.7rem;
-  font-weight: 600;
-  background: linear-gradient(135deg, var(--jetblue-navy), var(--jetblue-primary));
-  border-bottom: 2px solid var(--jetblue-accent);
-  border-radius: 0 0 20px 20px;
-  box-shadow: 0 8px 20px rgba(0,0,0,.5);
-  animation: fadeInUp 1s ease forwards;
-  opacity: 0;
+header{
+  text-align:center;
+  padding:30px 10px 10px;
 }
 
-/* Grid container */
-.grid {
-  display: grid;
-  gap: 20px;
-  padding: 20px;
-  grid-template-columns: 1fr;
-  box-sizing: border-box;
+header h1{
+  margin:0;
+  font-size:2.6rem;
+  color:var(--jb-dark);
+  letter-spacing:.04em;
 }
 
-/* Desktop two columns */
-@media (min-width: 768px) {
-  .grid {
-    grid-template-columns: 1fr 1fr;
-  }
+.grid{
+  max-width:1100px;
+  margin:40px auto;
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:30px;
+  padding:0 25px;
 }
 
-/* Panel styling */
-.panel {
-  background: linear-gradient(180deg, rgba(255,255,255,0.05), rgba(255,255,255,0.01));
-  border-radius: 24px;
-  box-shadow: 0 20px 40px rgba(0,0,0,.4);
-  overflow: hidden;
-  border: 1px solid rgba(255,255,255,0.15);
-  backdrop-filter: blur(14px);
-  transition: transform 0.3s, box-shadow 0.3s;
-  animation: floatFade 2s ease infinite alternate, fadeIn 1s ease forwards;
-  opacity: 0;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 16px;
-  height: 450px; /* Slightly taller panels */
+.card{
+  background:white;
+  border-radius:18px;
+  box-shadow:0 10px 30px rgba(0,0,0,.08);
+  overflow:hidden;
+  border:1px solid #d0ecfb;
 }
 
-.panel:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 30px 50px rgba(0,0,0,.5);
+.card h2{
+  margin:0;
+  padding:14px 20px;
+  background:linear-gradient(90deg,var(--jb-blue),#7fd3ff);
+  color:white;
+  font-weight:600;
+  letter-spacing:.05em;
+  text-align:center;
 }
 
-/* Linktree buttons */
-.link-button {
-  margin: 10px 0;
-  padding: 14px 24px;
-  width: 80%;
-  max-width: 300px;
-  text-align: center;
-  text-decoration: none;
-  font-weight: 600;
-  color: #fff;
-  background: var(--jetblue-mid);
-  border-radius: 12px;
-  transition: background 0.3s, transform 0.2s, box-shadow 0.2s;
-  box-shadow: 0 4px 10px rgba(0,0,0,.2);
+.card iframe{
+  width:100%;
+  height:480px;
+  border:none;
 }
 
-.link-button:hover {
-  background: var(--jetblue-light);
-  transform: scale(1.05);
-  box-shadow: 0 6px 15px rgba(0,0,0,.3);
+/* links */
+.links{
+  padding:20px;
+  display:grid;
+  grid-template-columns:1fr;
+  gap:14px;
 }
 
-/* Iframes for radar / maps / forecast */
-iframe {
-  width: 100%;
-  height: 100%;
-  border: none;
-  border-radius: 24px;
+.links a{
+  text-decoration:none;
+  background:var(--jb-light);
+  color:var(--jb-dark);
+  padding:14px 18px;
+  border-radius:14px;
+  font-weight:600;
+  text-align:center;
+  transition:.2s ease;
+  border:1px solid #cfe9f8;
 }
 
-/* Footer */
-footer {
-  margin: 0 20px 20px;
-  border-radius: 16px;
-  background: linear-gradient(135deg, var(--jetblue-mid), var(--jetblue-light));
-  border-top: 3px solid var(--jetblue-accent);
-  padding: 16px 20px;
-  text-align: center;
-  font-size: 1.2rem;
-  font-weight: 500;
-  box-shadow: 0 12px 25px rgba(0,0,0,.4);
-  animation: fadeInUp 1.2s ease forwards;
-  opacity: 0;
-}
-
-/* Animations */
-@keyframes floatFade {
-  0% { transform: translateY(0px); }
-  100% { transform: translateY(-6px); }
-}
-
-@keyframes fadeIn {
-  0% { opacity: 0; transform: translateY(20px); }
-  100% { opacity: 1; transform: translateY(0); }
-}
-
-@keyframes fadeInUp {
-  0% { opacity: 0; transform: translateY(30px); }
-  100% { opacity: 1; transform: translateY(0); }
-}
-
-/* Mobile tweaks */
-@media (max-width: 480px) {
-  header {
-    padding: 16px;
-    font-size: 1.4rem;
-  }
-  footer {
-    padding: 12px 16px;
-    font-size: 1rem;
-  }
+.links a:hover{
+  background:#d4f0ff;
+  transform:translateY(-2px);
 }
 </style>
 </head>
@@ -156,68 +94,30 @@ footer {
 <body>
 
 <header>
-Hello 👋 — Welcome to Johnny’s Dashboard
+  <h1>Capt Thrams Dashboard</h1>
 </header>
 
 <div class="grid">
 
-  <!-- Linktree-style panel -->
-  <div class="panel">
-    <a href="https://yournewsletterlink.com" class="link-button" target="_blank">Family Newsletter</a>
-    <a href="https://github.com/yourusername" class="link-button" target="_blank">GitHub Projects</a>
-    <a href="marriage.html" class="link-button" target="_blank">oh Yeah</a>
-    <a href="story.html" class="link-button" target="_blank">Story</a>
-    <a href="https://www.flightaware.com" class="link-button" target="_blank">Flight Info</a>
+  <!-- LINKS -->
+  <div class="card">
+    <h2>Quick Links</h2>
+    <div class="links">
+      <a href="https://www.flightaware.com" target="_blank">FlightAware</a>
+      <a href="https://radar.weather.gov" target="_blank">NOAA Radar</a>
+      <a href="https://www.windy.com" target="_blank">Windy</a>
+      <a href="https://www.marinetraffic.com" target="_blank">Marine Traffic</a>
+      <a href="https://www.weather.gov/okx/" target="_blank">NWS New York</a>
+    </div>
   </div>
 
-  <!-- NOAA Weather Radar zoomed on New England -->
-  <div class="panel">
-    <iframe 
-      src="https://radar.weather.gov/?extent=41.5,-73.5,44.5,-69.5" 
-      loading="lazy">
-    </iframe>
-  </div>
-
-  <!-- OpenSeaMap centered on Branford Harbor, CT -->
-  <div class="panel">
-    <iframe 
-      src="https://map.openseamap.org/?zoom=13&lat=41.2756&lon=-72.8006&layers=BFTFFTT" 
-      loading="lazy"
-      style="height:450px;">
-    </iframe>
-  </div>
-
-  <!-- NWS New Haven / Branford Forecast -->
-  <div class="panel">
-    <iframe
-      src="https://forecast.weather.gov/MapClick.php?lat=41.320998&lon=-72.922053&textField1=41.320998&textField2=-72.922053&site=okx"
-      loading="lazy"
-      style="height:450px;">
-    </iframe>
+  <!-- RADAR -->
+  <div class="card">
+    <h2>Live Weather Radar</h2>
+    <iframe src="https://radar.weather.gov/ridge/standard/KOKX_loop.gif"></iframe>
   </div>
 
 </div>
-
-<footer id="verse"></footer>
-
-<script>
-const verses = [
-  "“The Lord is my shepherd; I shall not want.” — Psalm 23:1",
-  "“For I know the plans I have for you…” — Jeremiah 29:11",
-  "“Be still, and know that I am God.” — Psalm 46:10",
-  "“Trust in the Lord with all your heart.” — Proverbs 3:5",
-  "“The Lord will watch over your coming and going.” — Psalm 121:8",
-  "“I can do all things through Christ who strengthens me.” — Philippians 4:13"
-];
-
-function setVerse() {
-  const v = verses[Math.floor(Math.random() * verses.length)];
-  document.getElementById("verse").textContent = v;
-}
-
-setVerse();
-setInterval(setVerse, 60000);
-</script>
 
 </body>
 </html>
