@@ -7,92 +7,103 @@
 
 <style>
 :root{
-  --jb-blue:#2aa7df;
-  --jb-light:#eaf6fd;
-  --jb-dark:#0c4a6e;
+  --jb-blue:#1f8fc7;
+  --jb-light:#d7effb;
+  --jb-dark:#083a5a;
+}
+
+*{
+  box-sizing:border-box;
+}
+
+html, body{
+  height:100%;
+  margin:0;
 }
 
 body{
-  margin:0;
-  min-height:100vh;
-  background:linear-gradient(180deg,#f4fbff,#dff2fb);
+  background:linear-gradient(180deg,#d9f1fb 0%, #b9e2f5 100%);
   font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
-  color:#06324a;
+  color:var(--jb-dark);
   display:flex;
   flex-direction:column;
 }
 
-}
-
 header{
   text-align:center;
-  padding:30px 10px 10px;
+  padding:28px 12px 10px;
 }
-.grid{
-  flex:1;
-}
+
 header h1{
   margin:0;
   font-size:2.6rem;
   color:var(--jb-dark);
-  letter-spacing:.04em;
+  letter-spacing:.05em;
+}
+
+.main{
+  flex:1;
+  display:flex;
+  align-items:stretch;
+  justify-content:center;
 }
 
 .grid{
-  max-width:1100px;
-  margin:40px auto;
+  width:100%;
+  max-width:1200px;
+  padding:30px;
   display:grid;
   grid-template-columns:1fr 1fr;
   gap:30px;
-  padding:0 25px;
 }
 
 .card{
   background:white;
-  border-radius:18px;
-  box-shadow:0 10px 30px rgba(0,0,0,.08);
+  border-radius:20px;
+  box-shadow:0 12px 35px rgba(0,0,0,.12);
   overflow:hidden;
-  border:1px solid #d0ecfb;
+  display:flex;
+  flex-direction:column;
+  border:1px solid #bcdff2;
 }
 
 .card h2{
   margin:0;
-  padding:14px 20px;
-  background:linear-gradient(90deg,var(--jb-blue),#7fd3ff);
+  padding:16px;
+  background:linear-gradient(90deg,var(--jb-blue),#4bb7ee);
   color:white;
   font-weight:600;
-  letter-spacing:.05em;
   text-align:center;
+  letter-spacing:.05em;
 }
 
 .card iframe{
+  flex:1;
   width:100%;
-  height:480px;
   border:none;
 }
 
 /* links */
 .links{
-  padding:20px;
+  padding:22px;
   display:grid;
-  grid-template-columns:1fr;
-  gap:14px;
+  gap:16px;
 }
 
 .links a{
   text-decoration:none;
-  background:var(--jb-light);
+  background:linear-gradient(180deg,#eaf6fd,#cdeafb);
   color:var(--jb-dark);
-  padding:14px 18px;
+  padding:16px;
   border-radius:14px;
   font-weight:600;
   text-align:center;
+  border:1px solid #b7def3;
   transition:.2s ease;
-  border:1px solid #cfe9f8;
 }
 
 .links a:hover{
-  background:#d4f0ff;
+  background:linear-gradient(180deg,#ffffff,#e2f4ff);
   transform:translateY(-2px);
 }
 </style>
@@ -104,26 +115,28 @@ header h1{
   <h1>Capt Thrams Dashboard</h1>
 </header>
 
-<div class="grid">
+<div class="main">
+  <div class="grid">
 
-  <!-- LINKS -->
-  <div class="card">
-    <h2>Quick Links</h2>
-    <div class="links">
-      <a href="https://www.flightaware.com" target="_blank">FlightAware</a>
-      <a href="https://radar.weather.gov" target="_blank">NOAA Radar</a>
-      <a href="https://www.windy.com" target="_blank">Windy</a>
-      <a href="https://www.marinetraffic.com" target="_blank">Marine Traffic</a>
-      <a href="https://www.weather.gov/okx/" target="_blank">NWS New York</a>
+    <!-- LINKS -->
+    <div class="card">
+      <h2>Quick Links</h2>
+      <div class="links">
+        <a href="https://www.flightaware.com" target="_blank">FlightAware</a>
+        <a href="https://radar.weather.gov" target="_blank">NOAA Radar</a>
+        <a href="https://www.windy.com" target="_blank">Windy</a>
+        <a href="https://www.marinetraffic.com" target="_blank">Marine Traffic</a>
+        <a href="https://www.weather.gov/okx/" target="_blank">NWS New York</a>
+      </div>
     </div>
-  </div>
 
-  <!-- RADAR -->
-  <div class="card">
-    <h2>Live Weather Radar</h2>
-    <iframe src="https://radar.weather.gov/ridge/standard/KOKX_loop.gif"></iframe>
-  </div>
+    <!-- RADAR -->
+    <div class="card">
+      <h2>Live Weather Radar</h2>
+      <iframe src="https://radar.weather.gov/ridge/standard/KOKX_loop.gif"></iframe>
+    </div>
 
+  </div>
 </div>
 
 </body>
