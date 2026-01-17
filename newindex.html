@@ -1,0 +1,327 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Dashboard</title>
+
+  <style>
+    :root{
+      /* JetBlue-ish “Highrise / Spotlight” inspired palette (tweak to taste) */
+      --bg0:#060B1A;          /* deep navy background */
+      --bg1:#0A1533;          /* panel background */
+      --card:#0E1F44;         /* card base */
+      --card2:#0B1A3A;        /* darker card */
+      --text:#EAF1FF;         /* primary text */
+      --muted:#AFC2F2;        /* secondary text */
+      --accent:#38BDF8;       /* spotlight cyan */
+      --accent2:#2DD4BF;      /* highrise teal */
+      --ring:rgba(56,189,248,.35);
+      --border:rgba(255,255,255,.10);
+      --shadow: 0 18px 60px rgba(0,0,0,.45);
+      --radius: 18px;
+    }
+
+    *{ box-sizing:border-box; }
+    html,body{ height:100%; }
+    body{
+      margin:0;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
+      color:var(--text);
+      background:
+        radial-gradient(1000px 700px at 20% -10%, rgba(56,189,248,.25), transparent 60%),
+        radial-gradient(900px 700px at 95% 10%, rgba(45,212,191,.18), transparent 55%),
+        linear-gradient(180deg, var(--bg0), #030611 70%);
+    }
+
+    /* subtle “highrise window” texture */
+    .texture{
+      position:fixed; inset:0;
+      pointer-events:none;
+      opacity:.22;
+      background-image:
+        linear-gradient(to right, rgba(255,255,255,.08) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(255,255,255,.06) 1px, transparent 1px);
+      background-size: 42px 42px;
+      mask-image: radial-gradient(700px 550px at 35% 15%, black 25%, transparent 70%);
+    }
+
+    .wrap{
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 22px 16px 40px;
+    }
+
+    header{
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:14px;
+      margin: 8px 0 18px;
+    }
+
+    .title{
+      display:flex; flex-direction:column; gap:6px;
+    }
+    .title h1{
+      margin:0;
+      font-size: 22px;
+      letter-spacing:.2px;
+    }
+    .title p{
+      margin:0;
+      color:var(--muted);
+      font-size: 13px;
+      line-height: 1.35;
+    }
+
+    .chip{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding: 10px 12px;
+      border:1px solid var(--border);
+      background: rgba(255,255,255,.04);
+      border-radius: 999px;
+      box-shadow: 0 10px 30px rgba(0,0,0,.25);
+      backdrop-filter: blur(10px);
+      font-size: 13px;
+      color: var(--muted);
+      user-select:none;
+      white-space:nowrap;
+    }
+    .dot{
+      width:10px; height:10px; border-radius:50%;
+      background: radial-gradient(circle at 30% 30%, #fff, var(--accent) 55%, rgba(56,189,248,.0) 70%);
+      box-shadow: 0 0 0 6px rgba(56,189,248,.12);
+    }
+
+    /* Responsive grid: stacks on small, flows horizontally on larger */
+    .grid{
+      display:grid;
+      grid-template-columns: 1fr;
+      gap: 14px;
+    }
+    @media (min-width: 860px){
+      .grid{
+        grid-template-columns: 1.1fr 1.6fr; /* link tree narrower, radar wider */
+        align-items: start;
+      }
+    }
+
+    .card{
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.03));
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(10px);
+      overflow:hidden;
+    }
+
+    .card-inner{
+      padding: 16px;
+    }
+
+    .card h2{
+      margin:0 0 6px;
+      font-size: 15px;
+      letter-spacing:.2px;
+    }
+    .card .sub{
+      margin:0 0 14px;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.4;
+    }
+
+    /* Link tree */
+    .links{
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+      margin-top: 6px;
+    }
+    .link{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap: 12px;
+      padding: 12px 12px;
+      border-radius: 14px;
+      border:1px solid rgba(255,255,255,.10);
+      background: rgba(8, 18, 45, .55);
+      text-decoration:none;
+      color: var(--text);
+      transition: transform .12s ease, border-color .12s ease, box-shadow .12s ease;
+    }
+    .link:hover{
+      transform: translateY(-1px);
+      border-color: rgba(56,189,248,.35);
+      box-shadow: 0 0 0 6px var(--ring);
+    }
+    .link .label{
+      display:flex; flex-direction:column; gap:2px;
+      min-width:0;
+    }
+    .link .label strong{
+      font-size: 14px;
+      font-weight: 650;
+      overflow:hidden;
+      text-overflow:ellipsis;
+      white-space:nowrap;
+    }
+    .link .label span{
+      font-size: 12px;
+      color: var(--muted);
+      overflow:hidden;
+      text-overflow:ellipsis;
+      white-space:nowrap;
+    }
+    .arrow{
+      width: 34px; height: 34px;
+      border-radius: 12px;
+      display:grid; place-items:center;
+      background: linear-gradient(135deg, rgba(56,189,248,.25), rgba(45,212,191,.18));
+      border: 1px solid rgba(255,255,255,.10);
+      flex: 0 0 auto;
+    }
+    .arrow svg{ opacity:.95; }
+
+    /* Radar */
+    .media{
+      border-top: 1px solid rgba(255,255,255,.08);
+      background: rgba(0,0,0,.20);
+    }
+    .media img{
+      width: 100%;
+      height: auto;
+      display:block;
+    }
+    .meta-row{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      margin-top: 10px;
+    }
+    .pill{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding: 8px 10px;
+      border-radius: 999px;
+      border:1px solid rgba(255,255,255,.10);
+      background: rgba(255,255,255,.04);
+      color: var(--muted);
+      font-size: 12px;
+      text-decoration:none;
+    }
+    .pill:hover{ border-color: rgba(56,189,248,.30); }
+
+    footer{
+      margin-top: 16px;
+      color: rgba(175,194,242,.75);
+      font-size: 12px;
+      text-align:center;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="texture"></div>
+
+  <div class="wrap">
+    <header>
+      <div class="title">
+        <h1>Dashboard</h1>
+        <p>Quick links + Northeast radar loop.</p>
+      </div>
+
+      <div class="chip" title="Status">
+        <span class="dot"></span>
+        <span>Spotlight mode</span>
+      </div>
+    </header>
+
+    <main class="grid">
+      <!-- Link Tree -->
+      <section class="card">
+        <div class="card-inner">
+          <h2>Links</h2>
+          <p class="sub">Your personal “link tree” for daily stuff.</p>
+
+          <div class="links">
+            <a class="link" href="https://mail.google.com" target="_blank" rel="noreferrer">
+              <div class="label">
+                <strong>Mail</strong>
+                <span>Inbox</span>
+              </div>
+              <div class="arrow" aria-hidden="true">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+                  <path d="M7 17L17 7" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                  <path d="M9 7h8v8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                </svg>
+              </div>
+            </a>
+
+            <a class="link" href="https://calendar.google.com" target="_blank" rel="noreferrer">
+              <div class="label">
+                <strong>Calendar</strong>
+                <span>What’s next</span>
+              </div>
+              <div class="arrow" aria-hidden="true">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+                  <path d="M7 17L17 7" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                  <path d="M9 7h8v8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                </svg>
+              </div>
+            </a>
+
+            <a class="link" href="https://www.trello.com" target="_blank" rel="noreferrer">
+              <div class="label">
+                <strong>Projects</strong>
+                <span>Trello / Notion / whatever</span>
+              </div>
+              <div class="arrow" aria-hidden="true">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+                  <path d="M7 17L17 7" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                  <path d="M9 7h8v8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                </svg>
+              </div>
+            </a>
+
+            <!-- add more links here -->
+          </div>
+        </div>
+      </section>
+
+      <!-- Radar -->
+      <section class="card">
+        <div class="card-inner">
+          <h2>NWS Radar · Northeast</h2>
+          <p class="sub">Animated loop pulled from the NWS ridge “standard” products.</p>
+
+          <div class="meta-row">
+            <a class="pill" href="https://radar.weather.gov/region/northeast/standard" target="_blank" rel="noreferrer">
+              Open interactive radar
+            </a>
+            <span class="pill" title="Tip">Tip: tap to zoom on mobile</span>
+          </div>
+        </div>
+
+        <div class="media">
+          <!-- NWS animated GIF loop -->
+          <img
+            src="https://radar.weather.gov/ridge/standard/NORTHEAST_loop.gif"
+            alt="National Weather Service Northeast regional radar loop"
+            loading="lazy"
+          />
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      Built for fast load, mobile-first layout, and a clean “tailfin” vibe.
+    </footer>
+  </div>
+</body>
+</html>
