@@ -7,26 +7,25 @@
 
   <style>
     :root{
-      /* JetBlue-ish “Highrise / Spotlight” inspired palette (tweak to taste) */
-      --bg0:#060B1A;          /* deep navy background */
-      --bg1:#0A1533;          /* panel background */
-      --card:#0E1F44;         /* card base */
-      --card2:#0B1A3A;        /* darker card */
-      --text:#EAF1FF;         /* primary text */
-      --muted:#AFC2F2;        /* secondary text */
-      --accent:#38BDF8;       /* spotlight cyan */
-      --accent2:#2DD4BF;      /* highrise teal */
+      --bg0:#060B1A;
+      --text:#EAF1FF;
+      --muted:#AFC2F2;
+      --accent:#38BDF8;
+      --accent2:#2DD4BF;
       --ring:rgba(56,189,248,.35);
       --border:rgba(255,255,255,.10);
       --shadow: 0 18px 60px rgba(0,0,0,.45);
       --radius: 18px;
+
+      /* Desktop “panel height” control */
+      --panel-h: 460px; /* adjust if you want a shorter/taller dashboard row */
     }
 
     *{ box-sizing:border-box; }
     html,body{ height:100%; }
     body{
       margin:0;
-      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
       color:var(--text);
       background:
         radial-gradient(1000px 700px at 20% -10%, rgba(56,189,248,.25), transparent 60%),
@@ -34,7 +33,6 @@
         linear-gradient(180deg, var(--bg0), #030611 70%);
     }
 
-    /* subtle “highrise window” texture */
     .texture{
       position:fixed; inset:0;
       pointer-events:none;
@@ -49,7 +47,10 @@
     .wrap{
       max-width: 1100px;
       margin: 0 auto;
-      padding: 22px 16px 40px;
+      min-height: 100vh;            /* ensures footer stays visible */
+      display:flex;
+      flex-direction:column;
+      padding: 22px 16px 18px;
     }
 
     header{
@@ -60,52 +61,37 @@
       margin: 8px 0 18px;
     }
 
-    .title{
-      display:flex; flex-direction:column; gap:6px;
-    }
     .title h1{
       margin:0;
       font-size: 22px;
       letter-spacing:.2px;
     }
     .title p{
-      margin:0;
+      margin:6px 0 0;
       color:var(--muted);
       font-size: 13px;
       line-height: 1.35;
     }
 
-    .chip{
-      display:inline-flex;
-      align-items:center;
-      gap:8px;
-      padding: 10px 12px;
-      border:1px solid var(--border);
-      background: rgba(255,255,255,.04);
-      border-radius: 999px;
-      box-shadow: 0 10px 30px rgba(0,0,0,.25);
-      backdrop-filter: blur(10px);
-      font-size: 13px;
-      color: var(--muted);
-      user-select:none;
-      white-space:nowrap;
-    }
-    .dot{
-      width:10px; height:10px; border-radius:50%;
-      background: radial-gradient(circle at 30% 30%, #fff, var(--accent) 55%, rgba(56,189,248,.0) 70%);
-      box-shadow: 0 0 0 6px rgba(56,189,248,.12);
+    /* Main content grows, footer stays at bottom */
+    main{
+      flex: 1 1 auto;
     }
 
-    /* Responsive grid: stacks on small, flows horizontally on larger */
     .grid{
       display:grid;
       grid-template-columns: 1fr;
       gap: 14px;
     }
+
+    /* Desktop: side by side, equal-height row */
     @media (min-width: 860px){
       .grid{
-        grid-template-columns: 1.1fr 1.6fr; /* link tree narrower, radar wider */
-        align-items: start;
+        grid-template-columns: 1.1fr 1.6fr;
+        align-items: stretch; /* important: makes cards match height */
+      }
+      .card{
+        height: var(--panel-h);
       }
     }
 
@@ -116,10 +102,16 @@
       box-shadow: var(--shadow);
       backdrop-filter: blur(10px);
       overflow:hidden;
+
+      /* Make internal layout controllable */
+      display:flex;
+      flex-direction:column;
+      min-height: 0;
     }
 
     .card-inner{
       padding: 16px;
+      flex: 0 0 auto;
     }
 
     .card h2{
@@ -134,13 +126,24 @@
       line-height: 1.4;
     }
 
-    /* Link tree */
+    /* Link tree: scroll within card if too many links */
     .links{
       display:flex;
       flex-direction:column;
       gap:10px;
-      margin-top: 6px;
+
+      /* Fill remaining height on desktop */
+      flex: 1 1 auto;
+      min-height: 0;
+      overflow:auto;
+      padding: 0 16px 16px;
     }
+
+    /* Keep padding consistent with .card-inner */
+    .links-pad{
+      padding: 0 16px 16px;
+    }
+
     .link{
       display:flex;
       align-items:center;
@@ -185,18 +188,27 @@
       border: 1px solid rgba(255,255,255,.10);
       flex: 0 0 auto;
     }
-    .arrow svg{ opacity:.95; }
 
-    /* Radar */
+    /* Radar: make smaller vertically and avoid pushing layout */
     .media{
       border-top: 1px solid rgba(255,255,255,.08);
       background: rgba(0,0,0,.20);
+
+      /* Fill remaining card height */
+      flex: 1 1 auto;
+      min-height: 0;
+
+      display:flex;
+      align-items:stretch;
     }
+
     .media img{
       width: 100%;
-      height: auto;
+      height: 100%;
+      object-fit: cover; /* trims vertical space nicely */
       display:block;
     }
+
     .meta-row{
       display:flex;
       gap:10px;
@@ -218,8 +230,9 @@
     .pill:hover{ border-color: rgba(56,189,248,.30); }
 
     footer{
-      margin-top: 16px;
-      color: rgba(175,194,242,.75);
+      margin-top: 14px;
+      padding: 8px 0 2px;
+      color: rgba(234,241,255,.85);
       font-size: 12px;
       text-align:center;
     }
@@ -235,21 +248,18 @@
         <h1>Dashboard</h1>
         <p>Quick links + Northeast radar loop.</p>
       </div>
-
-      <div class="chip" title="Status">
-        <span class="dot"></span>
-        <span>Spotlight mode</span>
-      </div>
     </header>
 
-    <main class="grid">
-      <!-- Link Tree -->
-      <section class="card">
-        <div class="card-inner">
-          <h2>Links</h2>
-          <p class="sub">Your personal “link tree” for daily stuff.</p>
+    <main>
+      <div class="grid">
+        <!-- Link Tree -->
+        <section class="card">
+          <div class="card-inner">
+            <h2>Links</h2>
+            <p class="sub">Your personal “link tree” for daily stuff.</p>
+          </div>
 
-          <div class="links">
+          <div class="links links-pad">
             <a class="link" href="https://mail.google.com" target="_blank" rel="noreferrer">
               <div class="label">
                 <strong>Mail</strong>
@@ -289,39 +299,35 @@
               </div>
             </a>
 
-            <!-- add more links here -->
+            <!-- Add more links; this section will scroll inside the card if it gets long -->
           </div>
-        </div>
-      </section>
+        </section>
 
-      <!-- Radar -->
-      <section class="card">
-        <div class="card-inner">
-          <h2>NWS Radar · Northeast</h2>
-          <p class="sub">Animated loop pulled from the NWS ridge “standard” products.</p>
+        <!-- Radar -->
+        <section class="card">
+          <div class="card-inner">
+            <h2>NWS Radar · Northeast</h2>
+            <p class="sub">Animated loop (cropped to fit the dashboard).</p>
 
-          <div class="meta-row">
-            <a class="pill" href="https://radar.weather.gov/region/northeast/standard" target="_blank" rel="noreferrer">
-              Open interactive radar
-            </a>
-            <span class="pill" title="Tip">Tip: tap to zoom on mobile</span>
+            <div class="meta-row">
+              <a class="pill" href="https://radar.weather.gov/region/northeast/standard" target="_blank" rel="noreferrer">
+                Open interactive radar
+              </a>
+            </div>
           </div>
-        </div>
 
-        <div class="media">
-          <!-- NWS animated GIF loop -->
-          <img
-            src="https://radar.weather.gov/ridge/standard/NORTHEAST_loop.gif"
-            alt="National Weather Service Northeast regional radar loop"
-            loading="lazy"
-          />
-        </div>
-      </section>
+          <div class="media">
+            <img
+              src="https://radar.weather.gov/ridge/standard/NORTHEAST_loop.gif"
+              alt="National Weather Service Northeast regional radar loop"
+              loading="lazy"
+            />
+          </div>
+        </section>
+      </div>
     </main>
 
-    <footer>
-      Built for fast load, mobile-first layout, and a clean “tailfin” vibe.
-    </footer>
+    <footer>Capt Thrams 2026</footer>
   </div>
 </body>
 </html>
