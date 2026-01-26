@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Baby Log</title>
+  <style>
+    :root { font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial; }
+    body { margin: 0; padding: 16px; max-width: 900px; margin-inline: auto; }
+    h1 { font-size: 22px; margin: 0 0 10px; }
+    .card { border: 1px solid #ddd; border-radius: 14px; padding: 14px; margin: 12px 0; }
+    .row { display: flex; gap: 10px; flex-wrap: wrap; }
+    button {
+      padding: 12px 14px; border-radius: 12px; border: 1px solid #ccc;
+      background: #fff; font-size: 16px; cursor: pointer;
+    }
+    button.primary { border-color: #111; }
+    button.danger { border-color: #b00020; }
+    button:disabled { opacity: .45; cursor: not-allowed; }
+    .stat { font-size: 14px; opacity: .85; margin-top: 8px; }
+    table { width: 100%; border-collapse: collapse; font-size: 14px; }
+    th, td { border-top: 1px solid #eee; padding: 10px 6px; vertical-align: top; }
+    th { text-align: left; font-weight: 600; opacity: .8; }
+    input, select {
+      padding: 10px; border-radius: 10px; border: 1px solid #ccc; font-size: 14px;
+    }
+    .small { font-size: 12px; opacity: .75; }
+    .pill { display: inline-block; padding: 2px 8px; border: 1px solid #ddd; border-radius: 999px; font-size: 12px; }
+  </style>
+</head>
+<body>
+  <h1>Baby Log</h1>
+  <div class="small">Runs offline in your browser. Data is saved on this device.</div>
+
+  <div class="card">
+    <div class="row">
+      <button id="startFeed" class="primary">Start Feed</button>
+      <button id="stopFeed">Stop Feed</button>
+      <select id="feedType">
+        <option value="Breast">Breast</option>
+        <option value="Bottle">Bottle</option>
+      </select>
+      <select id="side">
+        <option value="">Side (if breast)</option>
+        <option value="Left">Left</option>
+        <option value="Right">Right</option>
+        <option value="Both">Both</option>
+      </select>
+      <input id="amount" placeholder="Amount (oz or ml)" inputmode="decimal" />
+      <input id="notes" placeholder="Notes (spit-up, meds, etc.)" />
+    </div>
+    <div class="stat" id="feedStatus"></div>
+  </div>
+
+  <div class="card">
+    <div class="row">
+      <button id="startSleep" class="primary">Start Sleep</button>
+      <button id="wake" class="danger">Wake</button>
+      <input id="sleepNotes" placeholder="Sleep notes (crib, contact nap, etc.)" />
+    </div>
+    <div class="stat" id="sleepStatus"></div>
+  </div>
+
+  <div class="card">
+    <div class="row">
+      <button id="exportCsv">Export CSV</button>
+      <button id="clearAll" class="danger">Clear All</button>
+    </div>
+    <div class="small">Tip: Export occasionally for backup.</div>
+  </div>
+
+  <div class="card">
+    <div class="row" style="justify-content:space-between;align-items:center">
+      <div><strong>Log</strong> <span class="pill" id="countPill"></span></div>
+      <div class="small">Most recent first</div>
+    </div>
+    <div style="overflow:auto">
+      <table>
+        <thead>
+          <tr>
+            <th>Time</th>
+            <th>Event</th>
+            <th>Details</th>
+          </tr>
+        </thead>
+        <tbody id="logBody"></tbody>
+      </table>
+    </div>
+  </div>
+
+<script>
+  const KEY = "babylog_v1";
+  const state = {
+    feedActive: null,  // { startTs, type, side, amount, notes }
+    sleepActive: null, // { startTs, notes }
+    events: []         // { ts, kind, details }
+  };
+
+  function load() {
+    const raw = localStorage.getItem(KEY);
+    if (raw) {
+      try {
+        const parsed = JSON.parse(raw);
+        Object.assign(state, parsed);
+      } catch {}
+    }
+  }
+  function save() {
+    localStorage.setItem(KEY, JSON.stringify(state));
+  }
+
+  function fmtTime(ts) {
+    const d = new Date(ts);
+    return d.toLocaleString([], { weekday: "short", month:"short", day:"numeric", hour:"numeric", minute:"2-digit" });
+  }
+  function minsBetween(a, b) {
+    return Math.round((b - a) / 60000);
+  }
+  function humanSince(ts) {
+    if (!ts) return "";
+    const m = minsBetween(ts, Date.now());
+    const h = Math.floor(m / 60);
+    const mm = m % 60;
+    if (h <= 0) return `${mm}m ago`;
+    return `${h}h ${mm}m ago`;
+  }
+
+  function addEvent(kind, details) {
+    state.events.unshift({ ts: Date.now(), kind, details });
+    save();
+    render();
+  }
+
+  function render() {
+    // Buttons
+    startFeed.disabled = !!state.feedActive;
+    stopFeed.disabled = !state.feedActive;
+    startSleep.disabled = !!state.sleepActive;
+    wake.disabled = !state.sleepActive;
+
+    // Status
+    if (state.feedActive) {
+      feedStatus.textContent = `Feeding started ${humanSince(state.feedActive.startTs)} (${state.feedActive.type}${state.feedActive.side ? ", " + state.feedActive.side : ""})`;
+    } else {
+      const lastFeedStop = state.events.find(e => e.kind === "Feed Stop");
+      feedStatus.textContent = lastFeedStop
+        ? `Last feed ended ${humanSince(lastFeedStop.ts)}`
+        : "No feeds logged yet.";
+    }
+
+    if (state.sleepActive) {
+      sleepStatus.textContent = `Sleeping started ${humanSince(state.sleepActive.startTs)}`;
+    } else {
+      const lastWake = state.events.find(e => e.kind === "Wake");
+      sleepStatus.textContent = lastWake
+        ? `Last wake ${humanSince(lastWake.ts)}`
+        : "No sleep logged yet.";
+    }
+
+    // Log table
+    countPill.textContent = `${state.events.length} events`;
+    logBody.innerHTML = state.events.map(e => `
+      <tr>
+        <td>${fmtTime(e.ts)}</td>
+        <td><strong>${e.kind}</strong></td>
+        <td>${(e.details || "").replaceAll("<","&lt;")}</td>
+      </tr>
+    `).join("");
+  }
+
+  // Wire up
+  load();
+
+  startFeed.onclick = () => {
+    const type = feedType.value;
+    const sideVal = side.value;
+    const amountVal = amount.value.trim();
+    const notesVal = notes.value.trim();
+    state.feedActive = { startTs: Date.now(), type, side: sideVal, amount: amountVal, notes: notesVal };
+    addEvent("Feed Start", `${type}${sideVal ? " - " + sideVal : ""}${amountVal ? " - " + amountVal : ""}${notesVal ? " - " + notesVal : ""}`);
+  };
+
+  stopFeed.onclick = () => {
+    if (!state.feedActive) return;
+    const startTs = state.feedActive.startTs;
+    const durMin = minsBetween(startTs, Date.now());
+    const { type, side: sideVal, amount: amountVal, notes: notesVal } = state.feedActive;
+    state.feedActive = null;
+    addEvent("Feed Stop", `Duration: ${durMin} min | ${type}${sideVal ? " - " + sideVal : ""}${amountVal ? " - " + amountVal : ""}${notesVal ? " - " + notesVal : ""}`);
+  };
+
+  startSleep.onclick = () => {
+    const n = sleepNotes.value.trim();
+    state.sleepActive = { startTs: Date.now(), notes: n };
+    addEvent("Sleep Start", n);
+  };
+
+  wake.onclick = () => {
+    if (!state.sleepActive) return;
+    const startTs = state.sleepActive.startTs;
+    const durMin = minsBetween(startTs, Date.now());
+    const notesVal = state.sleepActive.notes;
+    state.sleepActive = null;
+    addEvent("Wake", `Sleep duration: ${durMin} min${notesVal ? " | " + notesVal : ""}`);
+  };
+
+  exportCsv.onclick = () => {
+    const rows = [["timestamp_iso","local_time","event","details"]];
+    for (const e of state.events.slice().reverse()) {
+      rows.push([new Date(e.ts).toISOString(), fmtTime(e.ts), e.kind, e.details || ""]);
+    }
+    const csv = rows.map(r => r.map(x => `"${String(x).replaceAll('"','""')}"`).join(",")).join("\n");
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = "baby-log.csv";
+    a.click();
+    URL.revokeObjectURL(a.href);
+  };
+
+  clearAll.onclick = () => {
+    if (!confirm("Clear all saved data on this device?")) return;
+    localStorage.removeItem(KEY);
+    state.feedActive = null;
+    state.sleepActive = null;
+    state.events = [];
+    render();
+  };
+
+  render();
+  setInterval(render, 30_000); // keep “x min ago” fresh
+</script>
+</body>
+</html>
