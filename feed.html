@@ -3,83 +3,236 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta name="color-scheme" content="dark" />
   <title>Baby Log</title>
   <style>
-    :root { font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial; }
-    body { margin: 0; padding: 16px; max-width: 900px; margin-inline: auto; }
-    h1 { font-size: 22px; margin: 0 0 10px; }
-    .card { border: 1px solid #ddd; border-radius: 14px; padding: 14px; margin: 12px 0; }
-    .row { display: flex; gap: 10px; flex-wrap: wrap; }
-    button {
-      padding: 12px 14px; border-radius: 12px; border: 1px solid #ccc;
-      background: #fff; font-size: 16px; cursor: pointer;
+    :root{
+      --bg:#0b0b10;
+      --card:#12121a;
+      --card2:#0f0f16;
+      --text:#f2f2f7;
+      --muted:rgba(242,242,247,.72);
+      --border:rgba(255,255,255,.10);
+      --border2:rgba(255,255,255,.14);
+      --shadow: 0 8px 30px rgba(0,0,0,.35);
+
+      /* pink accent */
+      --accent:#ff4fa3;
+      --accent2:#ff7bc1;
+      --danger:#ff4b5c;
+      --ok:#35d07f;
     }
-    button.primary { border-color: #111; }
-    button.danger { border-color: #b00020; }
-    button:disabled { opacity: .45; cursor: not-allowed; }
-    .stat { font-size: 14px; opacity: .85; margin-top: 8px; }
-    table { width: 100%; border-collapse: collapse; font-size: 14px; }
-    th, td { border-top: 1px solid #eee; padding: 10px 6px; vertical-align: top; }
-    th { text-align: left; font-weight: 600; opacity: .8; }
-    input, select {
-      padding: 10px; border-radius: 10px; border: 1px solid #ccc; font-size: 14px;
+
+    *{ box-sizing:border-box; }
+    body{
+      margin:0;
+      padding:16px;
+      background: radial-gradient(1200px 500px at 10% 0%, rgba(255,79,163,.12), transparent 55%),
+                  radial-gradient(900px 500px at 100% 10%, rgba(255,123,193,.10), transparent 60%),
+                  var(--bg);
+      color:var(--text);
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial;
+      -webkit-font-smoothing: antialiased;
+      max-width: 920px;
+      margin-inline:auto;
     }
-    .small { font-size: 12px; opacity: .75; }
-    .pill { display: inline-block; padding: 2px 8px; border: 1px solid #ddd; border-radius: 999px; font-size: 12px; }
+    h1{
+      font-size:22px; margin:0 0 8px;
+      letter-spacing:.2px;
+    }
+    .small{ font-size:12px; color:var(--muted); }
+    .card{
+      background: linear-gradient(180deg, rgba(255,255,255,.03), transparent 70%), var(--card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 14px;
+      margin: 12px 0;
+      box-shadow: var(--shadow);
+    }
+    .row{ display:flex; gap:10px; flex-wrap:wrap; align-items:center; }
+    button, .toggle, input, select{
+      border-radius: 14px;
+      border: 1px solid var(--border2);
+      background: var(--card2);
+      color: var(--text);
+      font-size: 16px;
+    }
+    button{
+      padding: 12px 14px;
+      cursor:pointer;
+      transition: transform .03s ease, border-color .15s ease;
+      user-select:none;
+      -webkit-tap-highlight-color: transparent;
+    }
+    button:active{ transform: translateY(1px); }
+    button.primary{
+      border-color: rgba(255,79,163,.45);
+      box-shadow: 0 0 0 2px rgba(255,79,163,.12) inset;
+    }
+    button.danger{
+      border-color: rgba(255,75,92,.55);
+    }
+    button:disabled{ opacity:.45; cursor:not-allowed; }
+    input, select{
+      padding: 10px 12px;
+      outline:none;
+      min-width: 140px;
+    }
+    input::placeholder{ color: rgba(242,242,247,.45); }
+
+    .stat{
+      margin-top:10px;
+      color:var(--muted);
+      font-size:14px;
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      align-items:center;
+    }
+    .pill{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding: 6px 10px;
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      background: rgba(255,255,255,.03);
+      font-size: 13px;
+      color: rgba(242,242,247,.85);
+    }
+    .dot{
+      width:8px; height:8px; border-radius:999px; background: var(--accent);
+      box-shadow: 0 0 0 3px rgba(255,79,163,.12);
+    }
+
+    /* toggles */
+    .toggle{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding: 10px 12px;
+      cursor:pointer;
+      user-select:none;
+      border-color: var(--border2);
+    }
+    .toggle .box{
+      width:18px;height:18px;border-radius:6px;
+      border:1px solid var(--border2);
+      background: rgba(255,255,255,.04);
+      display:inline-flex;align-items:center;justify-content:center;
+      font-size:14px; line-height:1;
+    }
+    .toggle.on{
+      border-color: rgba(255,79,163,.55);
+      box-shadow: 0 0 0 2px rgba(255,79,163,.10) inset;
+    }
+    .toggle.on .box{
+      background: rgba(255,79,163,.18);
+      border-color: rgba(255,79,163,.7);
+    }
+
+    table{ width:100%; border-collapse:collapse; font-size:14px; }
+    th, td{ border-top:1px solid rgba(255,255,255,.08); padding:10px 6px; vertical-align:top; }
+    th{ text-align:left; color:rgba(242,242,247,.75); font-weight:600; }
+    .right{ margin-left:auto; }
+    .hint{ color:rgba(242,242,247,.55); font-size:12px; }
+    .kbd{ font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size:12px; opacity:.85; }
   </style>
 </head>
+
 <body>
   <h1>Baby Log</h1>
-  <div class="small">Runs offline in your browser. Data is saved on this device.</div>
+  <div class="small">Dark by default • Saves on this device • Export CSV for backup</div>
 
+  <!-- FEED -->
   <div class="card">
     <div class="row">
       <button id="startFeed" class="primary">Start Feed</button>
       <button id="stopFeed">Stop Feed</button>
-      <select id="feedType">
+
+      <select id="feedType" title="Feed type">
         <option value="Breast">Breast</option>
         <option value="Bottle">Bottle</option>
       </select>
-      <select id="side">
+
+      <select id="side" title="Breast side">
         <option value="">Side (if breast)</option>
         <option value="Left">Left</option>
         <option value="Right">Right</option>
         <option value="Both">Both</option>
       </select>
+
       <input id="amount" placeholder="Amount (oz or ml)" inputmode="decimal" />
       <input id="notes" placeholder="Notes (spit-up, meds, etc.)" />
     </div>
-    <div class="stat" id="feedStatus"></div>
+
+    <div class="stat">
+      <span class="pill"><span class="dot"></span><span id="feedStatus">—</span></span>
+    </div>
   </div>
 
+  <!-- SLEEP -->
   <div class="card">
     <div class="row">
       <button id="startSleep" class="primary">Start Sleep</button>
       <button id="wake" class="danger">Wake</button>
       <input id="sleepNotes" placeholder="Sleep notes (crib, contact nap, etc.)" />
     </div>
-    <div class="stat" id="sleepStatus"></div>
+
+    <div class="stat">
+      <span class="pill"><span class="dot"></span><span id="sleepStatus">—</span></span>
+    </div>
   </div>
 
+  <!-- DIAPER -->
+  <div class="card">
+    <div class="row">
+      <div class="pill" style="border-color: rgba(255,79,163,.35);">
+        <span class="dot"></span>
+        <strong>Diaper</strong>
+        <span class="hint">tap to select, then log</span>
+      </div>
+
+      <div id="wetToggle" class="toggle" role="button" aria-pressed="false">
+        <span class="box" aria-hidden="true">✓</span> Wet
+      </div>
+
+      <div id="poopToggle" class="toggle" role="button" aria-pressed="false">
+        <span class="box" aria-hidden="true">✓</span> Poop
+      </div>
+
+      <input id="diaperNotes" placeholder="Diaper notes (rash, color, etc.)" />
+      <button id="logDiaper" class="primary">Log Diaper</button>
+      <button id="clearDiaper">Clear</button>
+    </div>
+
+    <div class="small" style="margin-top:8px;">
+      Tip: you can log a wet+poop together (common). If neither is selected, it won’t log.
+    </div>
+  </div>
+
+  <!-- UTIL -->
   <div class="card">
     <div class="row">
       <button id="exportCsv">Export CSV</button>
       <button id="clearAll" class="danger">Clear All</button>
+      <div class="right small">Shortcut: add to Home Screen for “app-like” use</div>
     </div>
-    <div class="small">Tip: Export occasionally for backup.</div>
   </div>
 
+  <!-- LOG -->
   <div class="card">
     <div class="row" style="justify-content:space-between;align-items:center">
       <div><strong>Log</strong> <span class="pill" id="countPill"></span></div>
       <div class="small">Most recent first</div>
     </div>
-    <div style="overflow:auto">
+
+    <div style="overflow:auto; margin-top:10px;">
       <table>
         <thead>
           <tr>
-            <th>Time</th>
-            <th>Event</th>
+            <th style="min-width:170px;">Time</th>
+            <th style="min-width:120px;">Event</th>
             <th>Details</th>
           </tr>
         </thead>
@@ -89,19 +242,24 @@
   </div>
 
 <script>
-  const KEY = "babylog_v1";
+  const KEY = "babylog_v2_dark";
+
   const state = {
-    feedActive: null,  // { startTs, type, side, amount, notes }
-    sleepActive: null, // { startTs, notes }
-    events: []         // { ts, kind, details }
+    feedActive: null,   // { startTs, type, side, amount, notes }
+    sleepActive: null,  // { startTs, notes }
+    diaperDraft: { wet:false, poop:false },
+    events: []          // { ts, kind, details }
   };
 
+  // ---------- persistence ----------
   function load() {
     const raw = localStorage.getItem(KEY);
     if (raw) {
       try {
         const parsed = JSON.parse(raw);
         Object.assign(state, parsed);
+        // backfill diaperDraft if older saved state
+        if (!state.diaperDraft) state.diaperDraft = { wet:false, poop:false };
       } catch {}
     }
   }
@@ -109,6 +267,7 @@
     localStorage.setItem(KEY, JSON.stringify(state));
   }
 
+  // ---------- helpers ----------
   function fmtTime(ts) {
     const d = new Date(ts);
     return d.toLocaleString([], { weekday: "short", month:"short", day:"numeric", hour:"numeric", minute:"2-digit" });
@@ -124,6 +283,9 @@
     if (h <= 0) return `${mm}m ago`;
     return `${h}h ${mm}m ago`;
   }
+  function esc(s){
+    return String(s || "").replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;");
+  }
 
   function addEvent(kind, details) {
     state.events.unshift({ ts: Date.now(), kind, details });
@@ -131,64 +293,81 @@
     render();
   }
 
+  // ---------- UI state ----------
+  function setToggle(el, on){
+    el.classList.toggle("on", on);
+    el.setAttribute("aria-pressed", String(on));
+  }
+
   function render() {
-    // Buttons
+    // buttons enable/disable
     startFeed.disabled = !!state.feedActive;
-    stopFeed.disabled = !state.feedActive;
+    stopFeed.disabled  = !state.feedActive;
     startSleep.disabled = !!state.sleepActive;
     wake.disabled = !state.sleepActive;
 
-    // Status
+    // feed status
     if (state.feedActive) {
-      feedStatus.textContent = `Feeding started ${humanSince(state.feedActive.startTs)} (${state.feedActive.type}${state.feedActive.side ? ", " + state.feedActive.side : ""})`;
+      const fa = state.feedActive;
+      feedStatus.textContent = `Feeding started ${humanSince(fa.startTs)} (${fa.type}${fa.side ? ", " + fa.side : ""})`;
     } else {
       const lastFeedStop = state.events.find(e => e.kind === "Feed Stop");
-      feedStatus.textContent = lastFeedStop
-        ? `Last feed ended ${humanSince(lastFeedStop.ts)}`
-        : "No feeds logged yet.";
+      feedStatus.textContent = lastFeedStop ? `Last feed ended ${humanSince(lastFeedStop.ts)}` : "No feeds logged yet.";
     }
 
+    // sleep status
     if (state.sleepActive) {
       sleepStatus.textContent = `Sleeping started ${humanSince(state.sleepActive.startTs)}`;
     } else {
       const lastWake = state.events.find(e => e.kind === "Wake");
-      sleepStatus.textContent = lastWake
-        ? `Last wake ${humanSince(lastWake.ts)}`
-        : "No sleep logged yet.";
+      sleepStatus.textContent = lastWake ? `Last wake ${humanSince(lastWake.ts)}` : "No sleep logged yet.";
     }
 
-    // Log table
+    // diaper toggles
+    setToggle(wetToggle, state.diaperDraft.wet);
+    setToggle(poopToggle, state.diaperDraft.poop);
+
+    // log count + table
     countPill.textContent = `${state.events.length} events`;
     logBody.innerHTML = state.events.map(e => `
       <tr>
-        <td>${fmtTime(e.ts)}</td>
-        <td><strong>${e.kind}</strong></td>
-        <td>${(e.details || "").replaceAll("<","&lt;")}</td>
+        <td>${esc(fmtTime(e.ts))}</td>
+        <td><strong>${esc(e.kind)}</strong></td>
+        <td>${esc(e.details)}</td>
       </tr>
     `).join("");
   }
 
-  // Wire up
+  // ---------- wire up ----------
   load();
 
+  // Feed
   startFeed.onclick = () => {
     const type = feedType.value;
     const sideVal = side.value;
     const amountVal = amount.value.trim();
     const notesVal = notes.value.trim();
+
     state.feedActive = { startTs: Date.now(), type, side: sideVal, amount: amountVal, notes: notesVal };
-    addEvent("Feed Start", `${type}${sideVal ? " - " + sideVal : ""}${amountVal ? " - " + amountVal : ""}${notesVal ? " - " + notesVal : ""}`);
+    addEvent("Feed Start",
+      `${type}${sideVal ? " - " + sideVal : ""}${amountVal ? " - " + amountVal : ""}${notesVal ? " - " + notesVal : ""}`
+    );
   };
 
   stopFeed.onclick = () => {
     if (!state.feedActive) return;
     const startTs = state.feedActive.startTs;
     const durMin = minsBetween(startTs, Date.now());
+
     const { type, side: sideVal, amount: amountVal, notes: notesVal } = state.feedActive;
     state.feedActive = null;
-    addEvent("Feed Stop", `Duration: ${durMin} min | ${type}${sideVal ? " - " + sideVal : ""}${amountVal ? " - " + amountVal : ""}${notesVal ? " - " + notesVal : ""}`);
+
+    addEvent("Feed Stop",
+      `Duration: ${durMin} min | ${type}${sideVal ? " - " + sideVal : ""}${amountVal ? " - " + amountVal : ""}${notesVal ? " - " + notesVal : ""}`
+    );
   };
 
+  // Sleep
   startSleep.onclick = () => {
     const n = sleepNotes.value.trim();
     state.sleepActive = { startTs: Date.now(), notes: n };
@@ -200,10 +379,46 @@
     const startTs = state.sleepActive.startTs;
     const durMin = minsBetween(startTs, Date.now());
     const notesVal = state.sleepActive.notes;
+
     state.sleepActive = null;
     addEvent("Wake", `Sleep duration: ${durMin} min${notesVal ? " | " + notesVal : ""}`);
   };
 
+  // Diaper toggles
+  wetToggle.onclick = () => {
+    state.diaperDraft.wet = !state.diaperDraft.wet;
+    save(); render();
+  };
+  poopToggle.onclick = () => {
+    state.diaperDraft.poop = !state.diaperDraft.poop;
+    save(); render();
+  };
+
+  clearDiaper.onclick = () => {
+    state.diaperDraft = { wet:false, poop:false };
+    diaperNotes.value = "";
+    save(); render();
+  };
+
+  logDiaper.onclick = () => {
+    const wet = state.diaperDraft.wet;
+    const poop = state.diaperDraft.poop;
+    const n = diaperNotes.value.trim();
+
+    if (!wet && !poop) return;
+
+    const bits = [];
+    if (wet) bits.push("Wet");
+    if (poop) bits.push("Poop");
+    addEvent("Diaper", `${bits.join(" + ")}${n ? " | " + n : ""}`);
+
+    // reset after logging
+    state.diaperDraft = { wet:false, poop:false };
+    diaperNotes.value = "";
+    save(); render();
+  };
+
+  // Export
   exportCsv.onclick = () => {
     const rows = [["timestamp_iso","local_time","event","details"]];
     for (const e of state.events.slice().reverse()) {
@@ -211,6 +426,7 @@
     }
     const csv = rows.map(r => r.map(x => `"${String(x).replaceAll('"','""')}"`).join(",")).join("\n");
     const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
+
     const a = document.createElement("a");
     a.href = URL.createObjectURL(blob);
     a.download = "baby-log.csv";
@@ -223,12 +439,13 @@
     localStorage.removeItem(KEY);
     state.feedActive = null;
     state.sleepActive = null;
+    state.diaperDraft = { wet:false, poop:false };
     state.events = [];
     render();
   };
 
   render();
-  setInterval(render, 30_000); // keep “x min ago” fresh
+  setInterval(render, 30_000); // keeps “x min ago” fresh
 </script>
 </body>
 </html>
