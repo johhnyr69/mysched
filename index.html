@@ -1,143 +1,589 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<title>Capt Thrams Dashboard</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<style>body{margin:0}[hidden]{display:none!important}img{max-width:100%}</style>
+</head>
+<body>
+<title>New Haven Desk</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
 <style>
+/* Layout: control-room grid — status strip on top, radar dominates left, conditions stack right, sound + links below */
 :root{
-  --jb-blue:#1f8fc7;
-  --jb-light:#d7effb;
-  --jb-dark:#083a5a;
+  --ink:#0d1317;        /* page ground, blue-green biased */
+  --panel:#141c21;      /* tile surface */
+  --panel-2:#1a242a;    /* inset / hover */
+  --line:#26333b;       /* hairlines */
+  --fg:#d9e2e6;         /* primary text */
+  --muted:#8798a2;      /* labels */
+  --dim:#5b6b74;        /* tertiary */
+  --amber:#e7a84a;      /* instrument backlight accent */
+  --sea:#6fb8c4;        /* water / tide */
+  --ok:#7cc48a; --warn:#e7c04a; --crit:#e66a5a;
+  --f-display:"Chakra Petch", "Rajdhani", ui-sans-serif, system-ui, sans-serif;
+  --f-body:"IBM Plex Sans", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --f-mono:"IBM Plex Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  color-scheme:dark;
 }
+html,body{background:var(--ink);color:var(--fg)}
+body{font-family:var(--f-body);font-size:14px;line-height:1.45}
+*{box-sizing:border-box}
+a{color:inherit}
+button,input,textarea{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--amber);outline-offset:2px}
+.wrap{max-width:1360px;margin:0 auto;padding-inline:16px;padding-block:16px 40px;display:grid;gap:14px}
 
-*{
-  box-sizing:border-box;
-}
+/* status strip */
+.strip{display:flex;flex-wrap:wrap;align-items:flex-end;gap:12px 28px;padding-block:6px 14px;border-bottom:1px solid var(--line)}
+.clock{font-family:var(--f-display);font-weight:600;font-size:clamp(2.4rem,6vw,3.4rem);line-height:1;letter-spacing:.02em;font-variant-numeric:tabular-nums}
+.clock .sec{color:var(--dim);font-size:.5em;margin-left:.15em}
+.date{color:var(--muted);font-size:.95rem;margin-top:4px}
+.station{font-family:var(--f-mono);font-size:.72rem;letter-spacing:.12em;text-transform:uppercase;color:var(--amber)}
+.sun{display:flex;flex-wrap:wrap;gap:8px 22px;margin-left:auto}
+.kv{display:grid;gap:2px}
+.kv .k{font-family:var(--f-mono);font-size:.68rem;letter-spacing:.1em;text-transform:uppercase;color:var(--dim)}
+.kv .v{font-family:var(--f-mono);font-size:1rem;font-variant-numeric:tabular-nums}
+.daybar{flex-basis:100%;height:6px;border-radius:3px;background:var(--panel-2);position:relative;overflow:hidden}
+.daybar .lit{position:absolute;top:0;bottom:0;background:linear-gradient(90deg,#3a4f5a,var(--amber) 50%,#3a4f5a)}
+.daybar .now{position:absolute;top:-2px;bottom:-2px;width:2px;background:var(--fg)}
 
-html, body{
-  height:100%;
-  margin:0;
-}
+/* grid */
+.grid{display:grid;gap:14px;grid-template-columns:minmax(0,1.55fr) minmax(0,1fr)}
+.col{display:grid;gap:14px;align-content:start;min-width:0}
+@media (max-width:900px){.grid{grid-template-columns:minmax(0,1fr)}.sun{margin-left:0}}
+.tile{background:var(--panel);border:1px solid var(--line);border-radius:6px;min-width:0}
+.tile-h{display:flex;align-items:center;gap:10px;padding:10px 14px;border-bottom:1px solid var(--line)}
+.tile-h h2{margin:0;font-family:var(--f-mono);font-weight:500;font-size:.74rem;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+.tile-h .meta{margin-left:auto;font-family:var(--f-mono);font-size:.7rem;color:var(--dim)}
+.tile-b{padding:14px}
+.ext{font-size:.78rem;color:var(--muted);text-decoration:none;border-bottom:1px solid var(--line)}
+.ext:hover{color:var(--amber);border-color:var(--amber)}
 
-body{
-  background:linear-gradient(180deg,#d9f1fb 0%, #b9e2f5 100%);
-  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
-  color:var(--jb-dark);
-  display:flex;
-  flex-direction:column;
-}
+/* segmented control */
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:4px;overflow:hidden}
+.seg button{background:none;border:0;padding:4px 10px;font-family:var(--f-mono);font-size:.7rem;letter-spacing:.06em;color:var(--muted);cursor:pointer}
+.seg button+button{border-left:1px solid var(--line)}
+.seg button[aria-pressed="true"]{background:var(--panel-2);color:var(--amber)}
 
-header{
-  text-align:center;
-  padding:28px 12px 10px;
-}
+/* radar */
+.radar-frame{position:relative;aspect-ratio:600/550;max-width:100%;background:#0a0f12;border-radius:4px;overflow:hidden}
+.radar-frame img{width:100%;height:100%;object-fit:contain;display:block}
+.radar-frame::after{content:"";position:absolute;inset:0;pointer-events:none;background:repeating-linear-gradient(0deg,transparent 0 3px,rgba(0,0,0,.08) 3px 4px)}
+.radar-foot{display:flex;flex-wrap:wrap;gap:8px 16px;align-items:center;margin-top:10px;font-size:.78rem;color:var(--muted)}
+.dbz{display:flex;align-items:center;gap:6px;font-family:var(--f-mono);font-size:.66rem;color:var(--dim)}
+.dbz i{display:block;width:120px;height:6px;border-radius:2px;background:linear-gradient(90deg,#04e9e7,#019ff4,#0300f4,#02fd02,#01c501,#008e00,#fdf802,#e5bc00,#fd9500,#fd0000,#d40000,#bc0000,#f800fd)}
 
-header h1{
-  margin:0;
-  font-size:2.6rem;
-  color:var(--jb-dark);
-  letter-spacing:.05em;
-}
+/* offline state */
+.offline{display:grid;place-content:center;gap:8px;text-align:center;padding:24px;color:var(--muted);min-height:140px}
+.radar-frame .offline{position:absolute;inset:0;background:radial-gradient(circle at 50% 50%,#13202a 0,#0a0f12 70%)}
+.offline strong{color:var(--fg);font-weight:500}
+.offline a{color:var(--amber)}
+.sweep{width:88px;height:88px;margin:0 auto 6px;border-radius:50%;border:1px solid #2a3b45;position:relative;background:repeating-radial-gradient(circle,transparent 0 21px,#1f2d35 21px 22px)}
+.sweep::before{content:"";position:absolute;inset:0;border-radius:50%;background:conic-gradient(from 0deg,rgba(231,168,74,.35),transparent 70deg);animation:spin 4s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+@media (prefers-reduced-motion:reduce){.sweep::before{animation:none}}
 
-.main{
-  flex:1;
-  display:flex;
-  align-items:stretch;
-  justify-content:center;
-}
+/* conditions */
+.now-row{display:flex;flex-wrap:wrap;align-items:flex-end;gap:6px 18px}
+.temp{font-family:var(--f-display);font-weight:500;font-size:3.6rem;line-height:.9;font-variant-numeric:tabular-nums}
+.temp sup{font-size:.4em;color:var(--muted);vertical-align:top;margin-left:2px}
+.cond{font-size:1.05rem}
+.cond small{display:block;color:var(--muted);font-size:.8rem}
+.obs{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-top:14px;padding-top:12px;border-top:1px solid var(--line)}
+@media (max-width:420px){.obs{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.spark{margin-top:14px}
+.spark svg{width:100%;height:84px;display:block}
+.spark-cap{display:flex;justify-content:space-between;font-family:var(--f-mono);font-size:.66rem;color:var(--dim)}
 
-.grid{
-  width:100%;
-  max-width:1200px;
-  padding:30px;
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:30px;
-}
+.days{display:grid;gap:0}
+.day{display:grid;grid-template-columns:3.4rem minmax(0,1fr) 2.6rem 4.2rem;gap:10px;align-items:center;padding:7px 0;border-top:1px solid var(--line)}
+.day:first-child{border-top:0}
+.day .dn{font-family:var(--f-mono);font-size:.8rem;color:var(--muted)}
+.day .sf{font-size:.84rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.day .pop{font-family:var(--f-mono);font-size:.72rem;color:var(--sea);text-align:right}
+.day .hl{font-family:var(--f-mono);font-size:.84rem;text-align:right;font-variant-numeric:tabular-nums}
+.day .hl span{color:var(--dim)}
 
-.card{
-  background:white;
-  border-radius:20px;
-  box-shadow:0 12px 35px rgba(0,0,0,.12);
-  overflow:hidden;
-  display:flex;
-  flex-direction:column;
-  border:1px solid #bcdff2;
-}
-
-.card h2{
-  margin:0;
-  padding:16px;
-  background:linear-gradient(90deg,var(--jb-blue),#4bb7ee);
-  color:white;
-  font-weight:600;
-  text-align:center;
-  letter-spacing:.05em;
-}
-
-.card iframe{
-  flex:1;
-  width:100%;
-  border:none;
-}
+/* marine */
+.marine-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:14px}
+@media (max-width:700px){.marine-grid{grid-template-columns:minmax(0,1fr)}}
+.mf p{margin:0 0 10px;max-width:65ch;font-size:.88rem}
+.mf .pn{font-family:var(--f-mono);font-size:.7rem;letter-spacing:.1em;text-transform:uppercase;color:var(--sea);display:block;margin-bottom:2px}
+.mf p.later{color:var(--muted);font-size:.82rem}
+.mf mark{background:none;color:var(--amber);font-weight:500}
+.sca{display:inline-block;font-family:var(--f-mono);font-size:.68rem;letter-spacing:.06em;padding:2px 7px;border-radius:3px;background:rgba(230,106,90,.14);color:var(--crit);margin-bottom:8px}
+.tides svg{width:100%;height:96px;display:block}
+.tide-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px 14px;margin-top:10px}
+.tide-ev{display:grid;gap:1px}
+.tide-ev .t{font-family:var(--f-mono);font-size:.68rem;letter-spacing:.1em;text-transform:uppercase}
+.tide-ev .t.H{color:var(--sea)} .tide-ev .t.L{color:var(--muted)}
+.tide-ev .v{font-family:var(--f-mono);font-variant-numeric:tabular-nums}
+.tide-ev .r{font-size:.74rem;color:var(--dim)}
 
 /* links */
-.links{
-  padding:22px;
-  display:grid;
-  gap:16px;
-}
-
-.links a{
-  text-decoration:none;
-  background:linear-gradient(180deg,#eaf6fd,#cdeafb);
-  color:var(--jb-dark);
-  padding:16px;
-  border-radius:14px;
-  font-weight:600;
-  text-align:center;
-  border:1px solid #b7def3;
-  transition:.2s ease;
-}
-
-.links a:hover{
-  background:linear-gradient(180deg,#ffffff,#e2f4ff);
-  transform:translateY(-2px);
-}
+.links-tools{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.search{flex:1 1 220px;min-width:0;display:flex;align-items:center;gap:8px;background:var(--ink);border:1px solid var(--line);border-radius:4px;padding:6px 10px}
+.search input{flex:1;min-width:0;background:none;border:0;outline:0}
+.search kbd{font-family:var(--f-mono);font-size:.66rem;color:var(--dim);border:1px solid var(--line);border-radius:3px;padding:0 5px}
+.btn{background:var(--panel-2);border:1px solid var(--line);border-radius:4px;padding:6px 12px;cursor:pointer;font-size:.82rem}
+.btn:hover{border-color:var(--muted)}
+.btn.on{color:var(--amber);border-color:var(--amber)}
+.btn.small{padding:3px 8px;font-size:.75rem}
+.groups{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:14px;margin-top:14px}
+.group{border:1px solid var(--line);border-radius:5px;padding:10px 10px 8px;min-width:0;background:var(--ink)}
+.group-h{display:flex;align-items:center;gap:6px;margin-bottom:6px}
+.group-h h3{margin:0;font-family:var(--f-mono);font-weight:500;font-size:.72rem;letter-spacing:.12em;text-transform:uppercase;color:var(--amber);flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.group-h input{flex:1;min-width:0;background:var(--panel-2);border:1px solid var(--line);border-radius:3px;padding:2px 6px;font-family:var(--f-mono);font-size:.72rem;text-transform:uppercase;letter-spacing:.1em;color:var(--amber)}
+.lk{display:flex;align-items:center;gap:8px;padding:5px 6px;border-radius:4px;text-decoration:none;min-width:0}
+.lk:hover,.lk.hit{background:var(--panel-2)}
+.lk.hit{outline:1px solid var(--amber)}
+.mono{flex:none;width:22px;height:22px;border-radius:4px;display:grid;place-content:center;font-family:var(--f-mono);font-size:.7rem;font-weight:500;background:var(--panel-2);color:var(--muted);border:1px solid var(--line)}
+.lk .tt{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:.88rem}
+.lk .dm{margin-left:auto;font-family:var(--f-mono);font-size:.64rem;color:var(--dim);white-space:nowrap}
+.row{display:flex;align-items:center;gap:4px}
+.row .lk{flex:1}
+.x{background:none;border:0;color:var(--dim);cursor:pointer;padding:2px 6px;border-radius:3px;font-size:.9rem;line-height:1}
+.x:hover{color:var(--crit);background:var(--panel-2)}
+.add{display:grid;gap:6px;margin-top:8px;padding-top:8px;border-top:1px dashed var(--line)}
+.add input{width:100%;background:var(--panel-2);border:1px solid var(--line);border-radius:3px;padding:5px 8px;font-size:.82rem}
+.add .btn{justify-self:start}
+.empty{color:var(--dim);font-size:.8rem;padding:4px 6px}
+.backup{margin-top:14px;display:grid;gap:8px}
+.backup textarea{width:100%;min-height:140px;background:var(--ink);border:1px solid var(--line);border-radius:4px;padding:10px;font-family:var(--f-mono);font-size:.74rem}
+.note{font-size:.78rem;color:var(--dim)}
+.toast{position:fixed;left:50%;bottom:calc(18px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--panel-2);border:1px solid var(--line);border-radius:5px;padding:8px 12px;display:flex;gap:12px;align-items:center;font-size:.85rem;box-shadow:0 6px 24px rgba(0,0,0,.4);z-index:5;max-width:calc(100% - 32px)}
+.toast button{background:none;border:0;color:var(--amber);cursor:pointer;font-weight:600}
 </style>
-</head>
 
-<body>
+<div class="wrap">
+  <header class="strip">
+    <div>
+      <div class="station">New Haven · 41.31°N 72.93°W</div>
+      <div class="clock" id="clock">--:--<span class="sec">--</span></div>
+      <div class="date" id="date">&nbsp;</div>
+    </div>
+    <div class="sun" id="sun"></div>
+    <div class="daybar" id="daybar" aria-hidden="true"><div class="lit"></div><div class="now"></div></div>
+  </header>
 
-<header>
-  <h1>Capt Thrams Dashboard</h1>
-</header>
-
-<div class="main">
   <div class="grid">
+    <section class="tile" aria-labelledby="radar-h">
+      <div class="tile-h">
+        <h2 id="radar-h">Radar</h2>
+        <div class="seg" role="group" aria-label="Radar view" id="radar-seg">
+          <button type="button" data-site="KOKX" aria-pressed="true">Upton · CT</button>
+          <button type="button" data-site="KBOX" aria-pressed="false">Boston</button>
+          <button type="button" data-site="NORTHEAST" aria-pressed="false">Northeast</button>
+        </div>
+        <span class="meta" id="radar-meta"></span>
+      </div>
+      <div class="tile-b">
+        <div class="radar-frame" id="radar-frame">
+          <img id="radar-img" alt="NWS base reflectivity radar loop" decoding="async">
+        </div>
+        <div class="radar-foot">
+          <span class="dbz">5<i></i>75 dBZ</span>
+          <span>Base reflectivity loop · refreshes every 5 min</span>
+          <a class="ext" id="radar-link" href="https://radar.weather.gov/station/kokx/standard" target="_blank" rel="noopener">Interactive radar ↗</a>
+        </div>
+      </div>
+    </section>
 
-    <!-- LINKS -->
-    <div class="card">
-      <h2>Quick Links</h2>
-      <div class="links">
-        <a href="signup.html" target="_blank">Family Newsletter</a>
-        <a href="https://radar.weather.gov" target="_blank">NOAA Radar</a>
-        <a href="https://www.windy.com" target="_blank">Windy</a>
-        <a href="https://www.marinetraffic.com" target="_blank">Marine Traffic</a>
-        <a href="https://www.weather.gov/okx/" target="_blank">NWS New York</a>
+    <div class="col">
+      <section class="tile" aria-labelledby="wx-h">
+        <div class="tile-h"><h2 id="wx-h">Now · KHVN Tweed</h2><span class="meta" id="obs-meta"></span></div>
+        <div class="tile-b" id="wx-now"><div class="offline">Loading conditions…</div></div>
+      </section>
+      <section class="tile" aria-labelledby="fc-h">
+        <div class="tile-h"><h2 id="fc-h">7-day</h2><a class="ext" style="margin-left:auto" href="https://forecast.weather.gov/MapClick.php?lat=41.3083&lon=-72.9279" target="_blank" rel="noopener">NWS forecast ↗</a></div>
+        <div class="tile-b" id="wx-days"><div class="offline">Loading forecast…</div></div>
+      </section>
+    </div>
+  </div>
+
+  <section class="tile" aria-labelledby="sound-h">
+    <div class="tile-h">
+      <h2 id="sound-h">Long Island Sound</h2>
+      <div class="seg" role="group" aria-label="Marine zone" id="zone-seg">
+        <button type="button" data-zone="ANZ335" aria-pressed="true">West of New Haven</button>
+        <button type="button" data-zone="ANZ330" aria-pressed="false">East of New Haven</button>
       </div>
     </div>
-
-    <!-- RADAR -->
-    <div class="card">
-      <h2>Live Weather Radar</h2>
-      <iframe src="https://radar.weather.gov/ridge/standard/KOKX_loop.gif"></iframe>
+    <div class="tile-b marine-grid">
+      <div class="mf" id="marine"><div class="offline">Loading marine forecast…</div></div>
+      <div class="tides">
+        <div class="tile-h" style="padding:0 0 8px;border:0"><h2>Tides · New Haven Harbor 8465705</h2><span class="meta">ft MLLW</span></div>
+        <div id="tides"><div class="offline">Loading tides…</div></div>
+      </div>
     </div>
+  </section>
 
-  </div>
+  <section class="tile" aria-labelledby="links-h">
+    <div class="tile-h"><h2 id="links-h">Links</h2><span class="meta" id="links-meta"></span></div>
+    <div class="tile-b">
+      <div class="links-tools">
+        <label class="search" for="q"><span aria-hidden="true" style="color:var(--dim)">⌕</span><input id="q" type="search" placeholder="Filter links — Enter opens the first match" autocomplete="off"><kbd>/</kbd></label>
+        <button class="btn" id="edit-btn" type="button" aria-pressed="false">Edit links</button>
+        <button class="btn" id="backup-btn" type="button" aria-pressed="false">Backup</button>
+      </div>
+      <div class="groups" id="groups"></div>
+      <div class="backup" id="backup" hidden>
+        <label class="note" for="backup-text">Your links as text. Copy it somewhere safe, or paste a saved copy here and load it.</label>
+        <textarea id="backup-text" spellcheck="false"></textarea>
+        <div class="links-tools">
+          <button class="btn" id="copy-backup" type="button">Copy</button>
+          <button class="btn" id="load-backup" type="button">Load pasted links</button>
+          <button class="btn" id="reset-links" type="button">Restore starter links</button>
+          <span class="note" id="backup-msg"></span>
+        </div>
+      </div>
+    </div>
+  </section>
+  <p class="note">Data: National Weather Service (api.weather.gov, radar.weather.gov) and NOAA Tides &amp; Currents. Sun times computed on this page. Links are saved in this browser.</p>
 </div>
+<div class="toast" id="toast" hidden><span id="toast-msg"></span><button type="button" id="toast-undo">Undo</button></div>
+
+<script>
+(() => {
+const LAT = 41.3083, LON = -72.9279, TZ = "America/New_York";
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const store = {
+  get(k, d){ try { const v = localStorage.getItem(k); return v == null ? d : JSON.parse(v); } catch { return d; } },
+  set(k, v){ try { localStorage.setItem(k, JSON.stringify(v)); } catch {} }
+};
+const fmtTime = (d, opts={}) => d.toLocaleTimeString("en-US", {timeZone:TZ, hour:"numeric", minute:"2-digit", ...opts});
+const offlineHTML = (what, href, label) =>
+  `<div class="offline"><strong>${what} isn't reachable from this page.</strong><span>It loads once the dashboard is on your own site.</span><a href="${href}" target="_blank" rel="noopener">${label} ↗</a></div>`;
+
+/* ---------- clock + sun ---------- */
+function sunTime(date, zenith, rising){
+  const rad = Math.PI/180;
+  const start = Date.UTC(date.getUTCFullYear(), 0, 0);
+  const N = Math.floor((Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate()) - start) / 864e5);
+  const lngHour = LON/15;
+  const t = N + ((rising ? 6 : 18) - lngHour)/24;
+  const M = 0.9856*t - 3.289;
+  let L = (M + 1.916*Math.sin(M*rad) + 0.020*Math.sin(2*M*rad) + 282.634) % 360; if (L<0) L+=360;
+  let RA = Math.atan(0.91764*Math.tan(L*rad))/rad; RA = (RA%360+360)%360;
+  RA = (RA + Math.floor(L/90)*90 - Math.floor(RA/90)*90)/15;
+  const sinDec = 0.39782*Math.sin(L*rad), cosDec = Math.cos(Math.asin(sinDec));
+  const cosH = (Math.cos(zenith*rad) - sinDec*Math.sin(LAT*rad)) / (cosDec*Math.cos(LAT*rad));
+  if (cosH > 1 || cosH < -1) return null;
+  let H = rising ? 360 - Math.acos(cosH)/rad : Math.acos(cosH)/rad; H/=15;
+  const T = H + RA - 0.06571*t - 6.622;
+  let UT = (T - lngHour) % 24; if (UT<0) UT+=24;
+  return new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate()) + UT*36e5);
+}
+function nyNoonUTC(now){ // a Date at the New York calendar day, used as the sun-calc anchor
+  const p = Object.fromEntries(new Intl.DateTimeFormat("en-US",{timeZone:TZ,year:"numeric",month:"numeric",day:"numeric"}).formatToParts(now).map(x=>[x.type,x.value]));
+  return new Date(Date.UTC(+p.year, +p.month-1, +p.day, 12));
+}
+let sunDay = "";
+function renderSun(now){
+  const anchor = nyNoonUTC(now), key = anchor.toISOString().slice(0,10);
+  const rise = sunTime(anchor, 90.833, true), set = sunTime(anchor, 90.833, false);
+  const dawn = sunTime(anchor, 96, true), dusk = sunTime(anchor, 96, false);
+  if (key !== sunDay){
+    sunDay = key;
+    const tmr = new Date(anchor.getTime()+864e5);
+    const len = set - rise, lenT = sunTime(tmr,90.833,false) - sunTime(tmr,90.833,true);
+    const dm = Math.round((lenT-len)/6e4*10)/10;
+    const h = Math.floor(len/36e5), m = Math.round(len%36e5/6e4);
+    $("#sun").innerHTML = [
+      ["First light", fmtTime(dawn)], ["Sunrise", fmtTime(rise)], ["Sunset", fmtTime(set)], ["Last light", fmtTime(dusk)],
+      ["Daylight", `${h}h ${String(m).padStart(2,"0")}m`], ["Tomorrow", `${dm>0?"+":"−"}${Math.abs(dm).toFixed(1)} min`]
+    ].map(([k,v]) => `<div class="kv"><span class="k">${k}</span><span class="v">${v}</span></div>`).join("");
+  }
+  // day bar spans civil dawn→dusk across a 24h track
+  const d0 = new Date(anchor.getTime() - 12*36e5 + nyOffsetMs(anchor));
+  const pct = t => Math.max(0, Math.min(100, (t - d0)/864e5*100));
+  const lit = $("#daybar .lit"); lit.style.left = pct(dawn)+"%"; lit.style.width = (pct(dusk)-pct(dawn))+"%";
+  $("#daybar .now").style.left = pct(now)+"%";
+}
+function nyOffsetMs(d){ // ms to add to a UTC wall time to get NY midnight → real instant
+  const p = Object.fromEntries(new Intl.DateTimeFormat("en-US",{timeZone:TZ,hourCycle:"h23",year:"numeric",month:"numeric",day:"numeric",hour:"numeric",minute:"numeric"}).formatToParts(d).map(x=>[x.type,x.value]));
+  const asUTC = Date.UTC(+p.year, +p.month-1, +p.day, +p.hour, +p.minute);
+  return d.getTime() - asUTC - (d.getUTCSeconds()*1e3 + d.getUTCMilliseconds());
+}
+function nyLocalToDate(str){ // "2026-10-08 15:34" in NY local → Date
+  const [dt, tm] = str.split(" "); const [y,mo,da] = dt.split("-").map(Number); const [h,mi] = tm.split(":").map(Number);
+  const guess = Date.UTC(y,mo-1,da,h,mi);
+  return new Date(guess + nyOffsetMs(new Date(guess)));
+}
+function tick(){
+  const now = new Date();
+  const p = Object.fromEntries(new Intl.DateTimeFormat("en-US",{timeZone:TZ,hour:"numeric",minute:"2-digit",second:"2-digit",hour12:true}).formatToParts(now).map(x=>[x.type,x.value]));
+  $("#clock").innerHTML = `${p.hour}:${p.minute}<span class="sec">${p.second} ${p.dayPeriod}</span>`;
+  $("#date").textContent = now.toLocaleDateString("en-US",{timeZone:TZ,weekday:"long",month:"long",day:"numeric",year:"numeric"});
+  renderSun(now);
+}
+tick(); setInterval(tick, 1000);
+
+/* ---------- radar ---------- */
+const RADAR = {
+  KOKX:{img:"https://radar.weather.gov/ridge/standard/KOKX_loop.gif", link:"https://radar.weather.gov/station/kokx/standard", label:"KOKX Upton NY"},
+  KBOX:{img:"https://radar.weather.gov/ridge/standard/KBOX_loop.gif", link:"https://radar.weather.gov/station/kbox/standard", label:"KBOX Taunton MA"},
+  NORTHEAST:{img:"https://radar.weather.gov/ridge/standard/NORTHEAST_loop.gif", link:"https://radar.weather.gov/region/northeast/standard", label:"Northeast mosaic"}
+};
+let radarSite = store.get("nhd.radar", "KOKX"); if (!RADAR[radarSite]) radarSite = "KOKX";
+function loadRadar(){
+  const r = RADAR[radarSite], frame = $("#radar-frame");
+  frame.querySelector(".offline")?.remove();
+  const img = $("#radar-img"); img.hidden = false;
+  img.onerror = () => {
+    img.hidden = true;
+    if (!frame.querySelector(".offline")) frame.insertAdjacentHTML("beforeend",
+      `<div class="offline"><div class="sweep"></div><strong>Radar loop isn't reachable from this page.</strong><span>It plays here once the dashboard is on your own site.</span><a href="${r.link}" target="_blank" rel="noopener">Open ${r.label} ↗</a></div>`);
+  };
+  img.onload = () => { $("#radar-meta").textContent = "updated " + fmtTime(new Date()); };
+  img.src = r.img + "?t=" + Math.floor(Date.now()/3e5);
+  $("#radar-link").href = r.link;
+  $("#radar-meta").textContent = r.label;
+  document.querySelectorAll("#radar-seg button").forEach(b => b.setAttribute("aria-pressed", b.dataset.site === radarSite));
+}
+$("#radar-seg").addEventListener("click", e => {
+  const b = e.target.closest("button"); if (!b) return;
+  radarSite = b.dataset.site; store.set("nhd.radar", radarSite); loadRadar();
+});
+loadRadar(); setInterval(loadRadar, 3e5);
+
+/* ---------- weather ---------- */
+const NWS = "https://api.weather.gov";
+async function getJSON(url){
+  const r = await fetch(url, {headers:{Accept:"application/geo+json"}});
+  if (!r.ok) throw new Error(r.status);
+  return r.json();
+}
+const cToF = c => c == null ? null : Math.round(c*9/5+32);
+const compass = d => d == null ? "" : ["N","NNE","NE","ENE","E","ESE","SE","SSE","S","SSW","SW","WSW","W","WNW","NW","NNW"][Math.round(d/22.5)%16];
+let pointsCache = null;
+async function loadWeather(){
+  try {
+    pointsCache ||= (await getJSON(`${NWS}/points/${LAT},${LON}`)).properties;
+    const [obs, fc, hr] = await Promise.all([
+      getJSON(`${NWS}/stations/KHVN/observations/latest`).then(j=>j.properties).catch(()=>null),
+      getJSON(pointsCache.forecast).then(j=>j.properties.periods),
+      getJSON(pointsCache.forecastHourly).then(j=>j.properties.periods).catch(()=>null)
+    ]);
+    renderNow(obs, fc, hr); renderDays(fc);
+  } catch (e) {
+    $("#wx-now").innerHTML = offlineHTML("Live conditions", "https://forecast.weather.gov/MapClick.php?lat=41.3083&lon=-72.9279", "New Haven on weather.gov");
+    $("#wx-days").innerHTML = offlineHTML("The forecast", "https://forecast.weather.gov/MapClick.php?lat=41.3083&lon=-72.9279", "7-day forecast");
+    $("#obs-meta").textContent = "offline";
+  }
+}
+function renderNow(o, fc, hr){
+  const p0 = fc[0];
+  const t = o ? cToF(o.temperature?.value) : null;
+  const temp = t ?? p0.temperature;
+  const desc = (o && o.textDescription) || p0.shortForecast;
+  const wind = o?.windSpeed?.value != null ? `${compass(o.windDirection?.value)} ${Math.round(o.windSpeed.value*0.621371)}` : p0.windSpeed;
+  const gust = o?.windGust?.value ? ` g${Math.round(o.windGust.value*0.621371)}` : "";
+  const rh = o?.relativeHumidity?.value != null ? Math.round(o.relativeHumidity.value)+"%" : "—";
+  const dp = o ? cToF(o.dewpoint?.value) : null;
+  const pres = o?.barometricPressure?.value ? (o.barometricPressure.value/3386.39).toFixed(2) : "—";
+  $("#obs-meta").textContent = o?.timestamp ? "obs " + fmtTime(new Date(o.timestamp)) : "forecast";
+  let spark = "";
+  if (hr && hr.length){
+    const h = hr.slice(0,24), W=300, H=84, top=10, bot=64;
+    const ts = h.map(x=>x.temperature), lo = Math.min(...ts)-2, hi = Math.max(...ts)+2;
+    const x = i => i*(W/(h.length-1)), y = v => bot - (v-lo)/(hi-lo)*(bot-top);
+    const line = h.map((p,i)=>`${i?"L":"M"}${x(i).toFixed(1)},${y(p.temperature).toFixed(1)}`).join("");
+    const bars = h.map((p,i)=>{ const pp = p.probabilityOfPrecipitation?.value||0; const bh = pp/100*22; return bh? `<rect x="${(x(i)-4).toFixed(1)}" y="${(84-bh).toFixed(1)}" width="8" height="${bh.toFixed(1)}" fill="var(--sea)" opacity=".45"/>`:""; }).join("");
+    const iMax = ts.indexOf(Math.max(...ts)), iMin = ts.indexOf(Math.min(...ts));
+    const lab = (i,above) => `<text x="${Math.min(Math.max(x(i),10),W-10)}" y="${y(ts[i])+(above?-5:13)}" text-anchor="middle" font-size="9" font-family="IBM Plex Mono, monospace" fill="var(--muted)">${ts[i]}°</text>`;
+    spark = `<div class="spark"><svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" role="img" aria-label="Next 24 hours temperature and precipitation chance">
+      <line x1="0" x2="${W}" y1="${bot}" y2="${bot}" stroke="var(--line)"/>${bars}
+      <path d="${line} L${W},${bot} L0,${bot}Z" fill="var(--amber)" opacity=".08"/>
+      <path d="${line}" fill="none" stroke="var(--amber)" stroke-width="1.6" vector-effect="non-scaling-stroke"/>
+      <circle cx="0" cy="${y(ts[0])}" r="3" fill="var(--amber)"/>${lab(iMax,true)}${iMin!==iMax?lab(iMin,false):""}</svg>
+      <div class="spark-cap"><span>now</span><span>next 24 h · bars = precip chance</span><span>+24h</span></div></div>`;
+  }
+  $("#wx-now").innerHTML = `
+    <div class="now-row"><div class="temp">${temp}<sup>°F</sup></div>
+      <div class="cond">${esc(desc)}<small>${esc(p0.name)}: ${esc(p0.shortForecast)}, ${p0.isDaytime?"high":"low"} ${p0.temperature}°</small></div></div>
+    <div class="obs">
+      <div class="kv"><span class="k">Wind mph</span><span class="v">${esc(wind)}${gust}</span></div>
+      <div class="kv"><span class="k">Humidity</span><span class="v">${rh}</span></div>
+      <div class="kv"><span class="k">Dew pt</span><span class="v">${dp!=null?dp+"°":"—"}</span></div>
+      <div class="kv"><span class="k">Press inHg</span><span class="v">${pres}</span></div>
+    </div>${spark}`;
+}
+function renderDays(periods){
+  const days = []; let i = 0;
+  if (periods[0] && !periods[0].isDaytime){ days.push({name:"Tonight", day:null, night:periods[0]}); i = 1; }
+  for (; i < periods.length && days.length < 7; i += 2) days.push({name:periods[i].name, day:periods[i], night:periods[i+1]});
+  $("#wx-days").innerHTML = `<div class="days">${days.map((d, idx) => {
+    const main = d.day || d.night;
+    const pops = [d.day, d.night].map(p=>p?.probabilityOfPrecipitation?.value||0);
+    const pop = Math.max(...pops);
+    const label = idx === 0 ? (d.day ? "Today" : "Tonight") : new Date(main.startTime).toLocaleDateString("en-US",{timeZone:TZ,weekday:"short"});
+    return `<div class="day"><span class="dn">${esc(label)}</span>
+      <span class="sf" title="${esc(main.detailedForecast)}">${esc(main.shortForecast)}</span>
+      <span class="pop">${pop?pop+"%":""}</span>
+      <span class="hl">${d.day?d.day.temperature+"°":""}<span>${d.day&&d.night?" / ":""}${d.night?d.night.temperature+"°":""}</span></span></div>`;
+  }).join("")}</div>`;
+}
+loadWeather(); setInterval(loadWeather, 10*6e4);
+
+/* ---------- marine + tides ---------- */
+let zone = store.get("nhd.zone", "ANZ335");
+function highlight(t){
+  return esc(t).replace(/(\d+\s*(?:to\s*\d+\s*)?kt)/gi,"<mark>$1</mark>").replace(/(seas[^.]*?\d+\s*(?:to\s*\d+\s*)?f(?:ee)?t|waves[^.]*?\d+\s*(?:to\s*\d+\s*)?f(?:ee)?t)/gi,"<mark>$1</mark>");
+}
+async function loadMarine(){
+  document.querySelectorAll("#zone-seg button").forEach(b => b.setAttribute("aria-pressed", b.dataset.zone === zone));
+  try {
+    const j = await getJSON(`${NWS}/zones/forecast/${zone}/forecast`);
+    const ps = (j.properties.periods || []).slice(0,4);
+    const all = ps.map(p=>p.detailedForecast).join(" ");
+    const sca = /(SMALL CRAFT ADVISORY|GALE WARNING|STORM WARNING)/i.exec(all);
+    $("#marine").innerHTML = (sca?`<span class="sca">${esc(sca[1].toUpperCase())}</span>`:"") +
+      ps.map((p,i)=>`<p class="${i>1?"later":""}"><span class="pn">${esc(p.name)}</span>${highlight(p.detailedForecast)}</p>`).join("") +
+      `<a class="ext" href="https://forecast.weather.gov/shmrn.php?mz=${zone.toLowerCase()}" target="_blank" rel="noopener">Full ${zone} forecast ↗</a>`;
+  } catch {
+    $("#marine").innerHTML = offlineHTML("The marine forecast", `https://forecast.weather.gov/shmrn.php?mz=${zone.toLowerCase()}`, `${zone} on weather.gov`);
+  }
+}
+$("#zone-seg").addEventListener("click", e => { const b = e.target.closest("button"); if (!b) return; zone = b.dataset.zone; store.set("nhd.zone", zone); loadMarine(); });
+
+async function loadTides(){
+  const now = new Date(), y = new Date(now.getTime()-864e5);
+  const p = Object.fromEntries(new Intl.DateTimeFormat("en-US",{timeZone:TZ,year:"numeric",month:"2-digit",day:"2-digit"}).formatToParts(y).map(x=>[x.type,x.value]));
+  const url = `https://api.tidesandcurrents.noaa.gov/api/prod/datagetter?station=8465705&product=predictions&datum=MLLW&interval=hilo&units=english&time_zone=lst_ldt&format=json&application=new_haven_desk&begin_date=${p.year}${p.month}${p.day}&range=96`;
+  try {
+    const r = await fetch(url); if (!r.ok) throw 0;
+    const ev = (await r.json()).predictions.map(e => ({t:nyLocalToDate(e.t), v:+e.v, type:e.type}));
+    renderTides(ev, now);
+  } catch {
+    $("#tides").innerHTML = offlineHTML("Tide predictions", "https://tidesandcurrents.noaa.gov/noaatidepredictions.html?id=8465705", "New Haven tides on NOAA");
+  }
+}
+function renderTides(ev, now){
+  const t0 = now.getTime() - 6*36e5, t1 = now.getTime() + 18*36e5, W = 300, H = 96, top = 12, bot = 78;
+  const lv = (t) => { for (let i=0;i<ev.length-1;i++){ const a=ev[i], b=ev[i+1]; if (t>=a.t && t<=b.t){ const f=(t-a.t)/(b.t-a.t); return a.v+(b.v-a.v)*(1-Math.cos(Math.PI*f))/2; } } return null; };
+  const vs = ev.map(e=>e.v), lo = Math.min(...vs, 0) - .3, hi = Math.max(...vs) + .3;
+  const x = t => (t - t0)/(t1 - t0)*W, y = v => bot - (v-lo)/(hi-lo)*(bot-top);
+  let d = ""; for (let k=0;k<=120;k++){ const t = t0 + (t1-t0)*k/120, v = lv(t); if (v!=null) d += `${d?"L":"M"}${x(t).toFixed(1)},${y(v).toFixed(1)}`; }
+  const nowV = lv(now.getTime());
+  const vis = ev.filter(e => e.t >= t0 && e.t <= t1);
+  const labs = vis.map(e => `<circle cx="${x(e.t).toFixed(1)}" cy="${y(e.v).toFixed(1)}" r="2.5" fill="var(--sea)"/><text x="${Math.min(Math.max(x(e.t),14),W-14).toFixed(1)}" y="${(e.type==="H"?y(e.v)-6:y(e.v)+13).toFixed(1)}" text-anchor="middle" font-size="9" font-family="IBM Plex Mono, monospace" fill="var(--muted)">${e.v.toFixed(1)}</text>`).join("");
+  const rising = lv(now.getTime()+6e5) > nowV;
+  const next = ev.filter(e => e.t > now).slice(0,4);
+  const rel = t => { const m = Math.round((t-now)/6e4); return `in ${Math.floor(m/60)}h ${String(m%60).padStart(2,"0")}m`; };
+  $("#tides").innerHTML = `<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" role="img" aria-label="Tide curve, 6 hours ago to 18 hours ahead">
+      <line x1="0" x2="${W}" y1="${y(0)}" y2="${y(0)}" stroke="var(--line)" stroke-dasharray="2 3"/>
+      <path d="${d} L${W},${bot+14} L0,${bot+14}Z" fill="var(--sea)" opacity=".12"/>
+      <path d="${d}" fill="none" stroke="var(--sea)" stroke-width="1.6" vector-effect="non-scaling-stroke"/>
+      <line x1="${x(now)}" x2="${x(now)}" y1="4" y2="${H-4}" stroke="var(--amber)" stroke-width="1"/>
+      ${nowV!=null?`<circle cx="${x(now)}" cy="${y(nowV)}" r="3.5" fill="var(--amber)"/>`:""}${labs}</svg>
+    <div class="spark-cap"><span>−6h</span><span>now ${nowV!=null?nowV.toFixed(1)+" ft, "+(rising?"rising":"falling"):""}</span><span>+18h</span></div>
+    <div class="tide-list">${next.map(e=>`<div class="tide-ev"><span class="t ${e.type}">${e.type==="H"?"High":"Low"}</span><span class="v">${fmtTime(e.t)} · ${e.v.toFixed(1)} ft</span><span class="r">${rel(e.t)}</span></div>`).join("")}</div>`;
+}
+loadMarine(); loadTides(); setInterval(loadMarine, 30*6e4); setInterval(loadTides, 15*6e4);
+
+/* ---------- links ---------- */
+const uid = () => Math.random().toString(36).slice(2,9);
+const STARTER = [
+  {name:"Weather", links:[
+    ["NWS New York (Upton)","https://www.weather.gov/okx/"],["NWS Boston","https://www.weather.gov/box/"],
+    ["Storm Prediction Center","https://www.spc.noaa.gov/"],["National Hurricane Center","https://www.nhc.noaa.gov/"],["Windy","https://www.windy.com/"]]},
+  {name:"On the water", links:[
+    ["LI Sound buoys (NDBC)","https://www.ndbc.noaa.gov/"],["New Haven tides","https://tidesandcurrents.noaa.gov/stationhome.html?id=8465705"],
+    ["CT DEEP","https://portal.ct.gov/deep"]]},
+  {name:"Local", links:[
+    ["CT Mirror","https://ctmirror.org/"],["New Haven Independent","https://www.newhavenindependent.org/"],
+    ["CTtransit","https://www.cttransit.com/"],["CT DOT travel (CTroads)","https://ctroads.org/"]]},
+  {name:"Everyday", links:[
+    ["Gmail","https://mail.google.com/"],["Google Calendar","https://calendar.google.com/"],["YouTube","https://www.youtube.com/"],["Claude","https://claude.ai/"]]}
+].map(g => ({id:uid(), name:g.name, links:g.links.map(([title,url]) => ({id:uid(), title, url}))}));
+
+let groups = store.get("nhd.links", null);
+if (!Array.isArray(groups)) groups = structuredClone(STARTER);
+let editing = false, query = "", undoState = null, toastTimer;
+const save = () => store.set("nhd.links", groups);
+const host = u => { try { return new URL(u).hostname.replace(/^www\./,""); } catch { return ""; } };
+const normUrl = u => { u = u.trim(); if (!u) return ""; if (!/^[a-z][a-z0-9+.-]*:/i.test(u)) u = "https://" + u; return u; };
+const safeHref = u => /^(https?|ftp):/i.test(u) ? u : "#";
+
+function matches(){ const q = query.toLowerCase(); return groups.flatMap(g => g.links.filter(l => !q || l.title.toLowerCase().includes(q) || l.url.toLowerCase().includes(q) || g.name.toLowerCase().includes(q))); }
+function renderLinks(){
+  const q = query.toLowerCase(), hits = matches(), first = q ? hits[0]?.id : null;
+  const total = groups.reduce((n,g)=>n+g.links.length,0);
+  $("#links-meta").textContent = q ? `${hits.length} of ${total}` : `${total} links · ${groups.length} groups`;
+  const html = groups.map(g => {
+    const ls = g.links.filter(l => !q || hits.includes(l));
+    if (q && !ls.length && !editing) return "";
+    const rows = ls.map(l => {
+      const a = `<a class="lk${l.id===first?" hit":""}" href="${esc(safeHref(l.url))}" target="_blank" rel="noopener"><span class="mono" aria-hidden="true">${esc((l.title.trim()[0]||"?").toUpperCase())}</span><span class="tt">${esc(l.title)}</span><span class="dm">${esc(host(l.url))}</span></a>`;
+      return editing ? `<div class="row">${a}<button class="x" type="button" data-del-link="${g.id}:${l.id}" aria-label="Remove ${esc(l.title)}">×</button></div>` : a;
+    }).join("") || `<div class="empty">${editing?"No links yet — add one below.":"Empty"}</div>`;
+    const head = editing
+      ? `<div class="group-h"><input id="gn-${g.id}" value="${esc(g.name)}" data-rename="${g.id}" aria-label="Group name"><button class="x" type="button" data-del-group="${g.id}" aria-label="Remove group ${esc(g.name)}">×</button></div>`
+      : `<div class="group-h"><h3>${esc(g.name)}</h3></div>`;
+    const add = editing ? `<form class="add" data-add="${g.id}"><input id="at-${g.id}" name="title" placeholder="Name" required><input id="au-${g.id}" name="url" placeholder="Address, e.g. example.com" required><button class="btn small" type="submit">Add link</button></form>` : "";
+    return `<div class="group">${head}${rows}${add}</div>`;
+  }).join("");
+  const addGroup = editing ? `<form class="group add" data-add-group style="border-top:1px solid var(--line);margin-top:0"><input id="new-group" name="name" placeholder="New group name" required><button class="btn small" type="submit">Add group</button></form>` : "";
+  $("#groups").innerHTML = html + addGroup || `<div class="empty">No links match “${esc(query)}”.</div>`;
+  if (q && !hits.length && !editing) $("#groups").innerHTML = `<div class="empty">No links match “${esc(query)}”.</div>`;
+}
+function snapshot(msg){ undoState = structuredClone(groups); showToast(msg); }
+function showToast(msg){
+  $("#toast-msg").textContent = msg; $("#toast").hidden = false;
+  clearTimeout(toastTimer); toastTimer = setTimeout(()=>{ $("#toast").hidden = true; undoState = null; }, 6000);
+}
+$("#toast-undo").addEventListener("click", () => { if (undoState){ groups = undoState; undoState = null; save(); renderLinks(); } $("#toast").hidden = true; });
+
+$("#groups").addEventListener("click", e => {
+  const dl = e.target.closest("[data-del-link]"), dg = e.target.closest("[data-del-group]");
+  if (dl){ const [gid,lid] = dl.dataset.delLink.split(":"); const g = groups.find(x=>x.id===gid); const l = g.links.find(x=>x.id===lid);
+    snapshot(`Removed “${l.title}”`); g.links = g.links.filter(x=>x.id!==lid); save(); renderLinks(); }
+  if (dg){ const g = groups.find(x=>x.id===dg.dataset.delGroup); snapshot(`Removed group “${g.name}”`); groups = groups.filter(x=>x!==g); save(); renderLinks(); }
+});
+$("#groups").addEventListener("change", e => {
+  const r = e.target.closest("[data-rename]"); if (!r) return;
+  const g = groups.find(x=>x.id===r.dataset.rename); const v = r.value.trim(); if (v){ g.name = v; save(); }
+});
+$("#groups").addEventListener("submit", e => {
+  e.preventDefault(); const f = e.target;
+  if (f.dataset.add){ const g = groups.find(x=>x.id===f.dataset.add); const title = f.elements.namedItem("title").value.trim(), url = normUrl(f.elements.namedItem("url").value);
+    if (!title || !url) return; g.links.push({id:uid(), title, url}); save(); renderLinks(); document.getElementById("at-"+g.id)?.focus(); }
+  else if ("addGroup" in f.dataset){ const name = f.elements.namedItem("name").value.trim(); if (!name) return; const g = {id:uid(), name, links:[]}; groups.push(g); save(); renderLinks(); document.getElementById("at-"+g.id)?.focus(); }
+});
+$("#edit-btn").addEventListener("click", e => { editing = !editing; e.currentTarget.classList.toggle("on", editing); e.currentTarget.setAttribute("aria-pressed", editing); e.currentTarget.textContent = editing ? "Done editing" : "Edit links"; renderLinks(); });
+$("#q").addEventListener("input", e => { query = e.target.value.trim(); renderLinks(); });
+$("#q").addEventListener("keydown", e => {
+  if (e.key === "Enter"){ const first = matches()[0]; if (first && query){ const a = document.querySelector(".lk.hit"); a ? a.click() : null; } }
+  if (e.key === "Escape"){ e.target.value = ""; query = ""; renderLinks(); }
+});
+document.addEventListener("keydown", e => { if (e.key === "/" && !/INPUT|TEXTAREA/.test(document.activeElement.tagName)){ e.preventDefault(); $("#q").focus(); } });
+
+$("#backup-btn").addEventListener("click", e => {
+  const b = $("#backup"); b.hidden = !b.hidden; e.currentTarget.classList.toggle("on", !b.hidden); e.currentTarget.setAttribute("aria-pressed", !b.hidden);
+  if (!b.hidden){ $("#backup-text").value = JSON.stringify(groups.map(g=>({name:g.name, links:g.links.map(l=>({title:l.title,url:l.url}))})), null, 2); $("#backup-msg").textContent = ""; }
+});
+$("#copy-backup").addEventListener("click", async () => {
+  const ta = $("#backup-text");
+  try { await navigator.clipboard.writeText(ta.value); $("#backup-msg").textContent = "Copied."; }
+  catch { ta.focus(); ta.select(); $("#backup-msg").textContent = "Selected — press Ctrl/⌘+C to copy."; }
+});
+$("#load-backup").addEventListener("click", () => {
+  try {
+    const data = JSON.parse($("#backup-text").value);
+    if (!Array.isArray(data)) throw 0;
+    const next = data.map(g => ({id:uid(), name:String(g.name||"Links"), links:(g.links||[]).filter(l=>l&&l.url).map(l => ({id:uid(), title:String(l.title||host(l.url)||l.url), url:normUrl(String(l.url))}))}));
+    snapshot("Loaded pasted links"); groups = next; save(); renderLinks(); $("#backup-msg").textContent = `Loaded ${next.length} groups.`;
+  } catch { $("#backup-msg").textContent = "That text isn't a links backup. Paste the full text you copied earlier, starting with [ ."; }
+});
+$("#reset-links").addEventListener("click", () => { snapshot("Restored starter links"); groups = structuredClone(STARTER); save(); renderLinks(); $("#backup-msg").textContent = ""; });
+renderLinks();
+})();
+</script>
 
 </body>
 </html>
