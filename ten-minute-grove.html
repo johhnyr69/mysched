@@ -1,0 +1,488 @@
+<title>Ten-Minute Grove</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=Atkinson+Hyperlegible:wght@400;700&display=swap">
+<style>
+/* Layout: a living landscape fills the screen; a quiet control strip sits along the bottom like a garden bench. */
+:root {
+  --bg:#eef2ee; --surface:#f8faf7; --ink:#1c2a23; --muted:#56685e; --line:#d5ddd4;
+  --accent:#2f6b4b; --accent-ink:#ffffff; --gold:#a8771f;
+  --sky-top:#b7d3da; --sky-bot:#eef0df; --orb:#f5d27e; --hill-far:#a6c3ae; --hill-near:#84aa8c;
+  --field-top:#9bbf85; --field-bot:#6c975f; --bark:#6b4f3a; --birch:#f1eee6;
+  --leaf1:#3e7b4c; --leaf2:#5a9848; --leaf3:#2e6a52; --leaf4:#79a63d; --pine:#2b5943; --soil:#7a5a3f;
+  --night:0;
+  --font-display:"Bricolage Grotesque", "Avenir Next", "Segoe UI", system-ui, sans-serif;
+  --font-body:"Atkinson Hyperlegible", "Segoe UI", system-ui, -apple-system, sans-serif;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg:#0d1416; --surface:#142024; --ink:#e3ebe5; --muted:#92a59a; --line:#26363a;
+  --accent:#80cf9c; --accent-ink:#0b1a12; --gold:#e0b45c;
+  --sky-top:#08121b; --sky-bot:#1b2f37; --orb:#ebe6cf; --hill-far:#1b2d2c; --hill-near:#172826;
+  --field-top:#1e3a2b; --field-bot:#11261b; --bark:#4c3a2b; --birch:#cfcdc4;
+  --leaf1:#2e6a45; --leaf2:#457f48; --leaf3:#245848; --leaf4:#5b8838; --pine:#1e4836; --soil:#3a2b20;
+  --night:1; color-scheme: dark;
+} }
+:root[data-theme="dark"] {
+  --bg:#0d1416; --surface:#142024; --ink:#e3ebe5; --muted:#92a59a; --line:#26363a;
+  --accent:#80cf9c; --accent-ink:#0b1a12; --gold:#e0b45c;
+  --sky-top:#08121b; --sky-bot:#1b2f37; --orb:#ebe6cf; --hill-far:#1b2d2c; --hill-near:#172826;
+  --field-top:#1e3a2b; --field-bot:#11261b; --bark:#4c3a2b; --birch:#cfcdc4;
+  --leaf1:#2e6a45; --leaf2:#457f48; --leaf3:#245848; --leaf4:#5b8838; --pine:#1e4836; --soil:#3a2b20;
+  --night:1; color-scheme: dark;
+}
+html, body { height: 100%; }
+body { background: var(--bg); color: var(--ink); font-family: var(--font-body); font-size: 15px; }
+.app { height: 100%; display: grid; grid-template-rows: auto 1fr auto; }
+
+header {
+  display: flex; align-items: baseline; justify-content: space-between; gap: 12px; flex-wrap: wrap;
+  padding-block: 12px 10px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+h1 { margin: 0; font-family: var(--font-display); font-weight: 700; font-size: 1.25rem; letter-spacing: -0.01em; }
+h1 span { color: var(--accent); }
+.stats { display: flex; gap: 18px; color: var(--muted); font-size: 0.85rem; font-variant-numeric: tabular-nums; }
+.stats b { color: var(--ink); font-weight: 700; }
+
+.scene { position: relative; min-height: 0; overflow: hidden; }
+canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+.hint {
+  position: absolute; left: 50%; top: 14%; transform: translateX(-50%);
+  font-family: var(--font-display); font-size: clamp(1rem, 2.4vw, 1.35rem); text-align: center;
+  color: var(--ink); opacity: .78; max-width: 26ch; text-wrap: balance; pointer-events: none;
+}
+.toast {
+  position: absolute; left: 50%; top: 18px; transform: translate(-50%, -8px);
+  background: var(--surface); color: var(--ink); border: 1px solid var(--line);
+  padding: 8px 14px; border-radius: 999px; font-size: .9rem; opacity: 0; transition: .4s ease;
+  box-shadow: 0 6px 20px rgba(0,0,0,.12); white-space: nowrap;
+}
+.toast.show { opacity: 1; transform: translate(-50%, 0); }
+.badge { position: absolute; right: max(12px, env(safe-area-inset-right, 0px)); bottom: 10px; font-size: .75rem;
+  color: var(--gold); letter-spacing: .06em; text-transform: uppercase; }
+
+.panel {
+  background: var(--surface); border-top: 1px solid var(--line);
+  display: grid; grid-template-columns: minmax(0, 1.1fr) auto minmax(0, 1.4fr); gap: 20px 32px; align-items: center;
+  padding-block: 16px calc(16px + env(safe-area-inset-bottom, 0px));
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+.clock { min-width: 0; }
+.time { font-family: var(--font-display); font-weight: 500; font-size: clamp(2.4rem, 6vw, 3.4rem);
+  line-height: 1; letter-spacing: -0.02em; font-variant-numeric: tabular-nums; }
+.next { margin-top: 8px; display: flex; align-items: center; gap: 10px; color: var(--muted); font-size: .88rem; font-variant-numeric: tabular-nums; }
+.bar { flex: 1; max-width: 220px; height: 6px; border-radius: 3px; background: var(--line); overflow: hidden; }
+.bar i { display: block; height: 100%; width: 0; background: var(--accent); border-radius: 3px; transition: width .4s linear; }
+
+.controls { display: flex; gap: 10px; align-items: center; }
+button { font: inherit; cursor: pointer; }
+button:focus-visible, input:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+.primary {
+  background: var(--accent); color: var(--accent-ink); border: 0; border-radius: 999px;
+  padding: 14px 30px; font-family: var(--font-display); font-weight: 700; font-size: 1.05rem; min-width: 128px;
+}
+.primary:hover { filter: brightness(1.06); }
+.ghost { background: transparent; color: var(--muted); border: 1px solid var(--line); border-radius: 999px; padding: 12px 18px; }
+.ghost:hover { color: var(--ink); border-color: var(--muted); }
+
+.sound { min-width: 0; display: grid; gap: 10px; }
+.label { font-size: .72rem; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.chip { background: transparent; border: 1px solid var(--line); color: var(--ink); border-radius: 8px; padding: 6px 11px; font-size: .88rem; }
+.chip[aria-pressed="true"] { background: var(--ink); color: var(--surface); border-color: var(--ink); }
+.vol { display: flex; align-items: center; gap: 10px; }
+.vol input { flex: 1; max-width: 240px; accent-color: var(--accent); }
+.more { display: flex; gap: 12px; align-items: center; font-size: .8rem; color: var(--muted); }
+.link { background: none; border: 0; color: var(--muted); text-decoration: underline; text-underline-offset: 3px; padding: 0; font-size: .8rem; }
+.link.danger { color: #b5483b; }
+
+@media (max-width: 760px) {
+  .panel { grid-template-columns: 1fr auto; gap: 14px 16px; }
+  .sound { grid-column: 1 / -1; }
+  .primary { padding: 12px 22px; min-width: 104px; }
+  .controls { flex-direction: column; align-items: stretch; }
+}
+@media (prefers-reduced-motion: reduce) { .toast, .bar i { transition: none; } }
+</style>
+
+<div class="app">
+  <header>
+    <h1>Ten-Minute <span>Grove</span></h1>
+    <div class="stats" aria-live="polite">
+      <span>Today <b id="statToday">0</b></span>
+      <span>Grove <b id="statGrove">0</b> trees</span>
+      <span><b id="statHours">0h 0m</b> focused</span>
+    </div>
+  </header>
+
+  <div class="scene" id="scene">
+    <canvas id="cv" aria-label="A landscape where a new tree grows for every ten minutes of focus"></canvas>
+    <div class="hint" id="hint">Press Start. A tree grows for every 10 minutes you stay with it.</div>
+    <div class="toast" id="toast" role="status"></div>
+    <div class="badge" id="demoBadge" hidden>Demo speed · 1 tree per 15s</div>
+  </div>
+
+  <section class="panel">
+    <div class="clock">
+      <div class="time" id="time">00:00</div>
+      <div class="next"><span id="nextTxt">First tree in 10:00</span><div class="bar"><i id="bar"></i></div></div>
+    </div>
+    <div class="controls">
+      <button class="primary" id="startBtn">Start</button>
+      <button class="ghost" id="endBtn" hidden>End session</button>
+    </div>
+    <div class="sound">
+      <div class="label">Focus sound</div>
+      <div class="chips" id="chips">
+        <button class="chip" data-s="rain" aria-pressed="true">Rain</button>
+        <button class="chip" data-s="forest" aria-pressed="false">Forest</button>
+        <button class="chip" data-s="brown" aria-pressed="false">Brown noise</button>
+        <button class="chip" data-s="pad" aria-pressed="false">Soft chords</button>
+        <button class="chip" data-s="off" aria-pressed="false">Silence</button>
+      </div>
+      <div class="vol">
+        <label class="label" for="vol">Volume</label>
+        <input id="vol" type="range" min="0" max="100" value="55">
+      </div>
+      <div class="more">
+        <span id="moreTxt">Chime when a tree finishes</span>
+        <button class="link" id="clearBtn">Clear grove</button>
+        <button class="link danger" id="confirmClear" hidden>Yes, clear all trees</button>
+      </div>
+    </div>
+  </section>
+</div>
+
+<script>
+(() => {
+"use strict";
+const DEMO = location.hash === "#demo";
+const TREE_MS = DEMO ? 15000 : 10 * 60 * 1000;
+const $ = id => document.getElementById(id);
+if (DEMO) $("demoBadge").hidden = false;
+
+/* ---------- storage ---------- */
+const KEY = "ten-minute-grove.v1";
+function load() { try { const d = JSON.parse(localStorage.getItem(KEY)); if (d && Array.isArray(d.trees)) return d; } catch (e) {} return { trees: [], sound: "rain", vol: 55 }; }
+function save() { try { localStorage.setItem(KEY, JSON.stringify(store)); } catch (e) {} }
+const store = load();
+
+/* ---------- utils ---------- */
+function rng(a) { return function () { a |= 0; a = a + 0x6D2B79F5 | 0; let t = Math.imul(a ^ a >>> 15, 1 | a); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
+const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
+const seg = (g, a, b) => clamp((g - a) / (b - a), 0, 1);
+const ease = t => 1 - Math.pow(1 - t, 3);
+const seedFor = i => (Math.imul(i + 1, 2654435761) ^ 0x9e3779b) >>> 0;
+function hex(c) { c = c.trim().replace("#", ""); return [0, 2, 4].map(k => parseInt(c.slice(k, k + 2), 16)); }
+function mix(a, b, t) { const A = hex(a), B = hex(b); return "rgb(" + A.map((v, k) => Math.round(v + (B[k] - v) * t)).join(",") + ")"; }
+const fmt = ms => { const s = Math.floor(ms / 1000), h = Math.floor(s / 3600), m = Math.floor(s / 60) % 60, ss = s % 60;
+  return (h ? h + ":" + String(m).padStart(2, "0") : String(m).padStart(2, "0")) + ":" + String(ss).padStart(2, "0"); };
+
+/* ---------- palette from CSS ---------- */
+let P = {};
+function readPalette() {
+  const cs = getComputedStyle(document.documentElement), g = n => cs.getPropertyValue("--" + n).trim();
+  P = { skyTop: g("sky-top"), skyBot: g("sky-bot"), orb: g("orb"), hillFar: g("hill-far"), hillNear: g("hill-near"),
+    fieldTop: g("field-top"), fieldBot: g("field-bot"), bark: g("bark"), birch: g("birch"),
+    leaves: [g("leaf1"), g("leaf2"), g("leaf3"), g("leaf4")], pine: g("pine"), soil: g("soil"), night: g("night") === "1" };
+}
+
+/* ---------- tree drawing ---------- */
+function drawTree(c, x, y, H, g, seed, sway) {
+  const r = rng(seed);
+  const kindRoll = r();
+  const kind = kindRoll < 0.38 ? "oak" : kindRoll < 0.62 ? "pine" : kindRoll < 0.8 ? "birch" : "round";
+  const leaf = P.leaves[Math.floor(r() * P.leaves.length)];
+  const blobs = []; for (let i = 0; i < 11; i++) blobs.push([r() * Math.PI * 2, r(), r(), r()]);
+  const lean = (r() - 0.5) * 0.08;
+  const dark = P.night ? "#05100b" : "#10281a", light = P.night ? "#b7d9a4" : "#e9f5c8";
+  sway = sway || 0;
+
+  c.save(); c.translate(x, y);
+  if (g < 0.14) { // sprout
+    const s = ease(seg(g, 0, 0.14)), h = H * (0.03 + 0.06 * s);
+    c.strokeStyle = mix(leaf, dark, 0.15); c.lineWidth = Math.max(1, H * 0.008); c.lineCap = "round";
+    c.beginPath(); c.moveTo(0, 0); c.quadraticCurveTo(H * 0.01, -h * 0.5, sway * h * 4, -h); c.stroke();
+    c.fillStyle = mix(leaf, light, 0.2);
+    for (const d of [-1, 1]) { c.save(); c.translate(sway * h * 4, -h); c.rotate(d * 0.9);
+      c.beginPath(); c.ellipse(d * H * 0.02 * (0.4 + s), 0, H * 0.024 * (0.4 + s), H * 0.011 * (0.4 + s), 0, 0, Math.PI * 2); c.fill(); c.restore(); }
+    c.restore(); return;
+  }
+  const tg = ease(seg(g, 0.1, 0.85)), cg = ease(seg(g, 0.22, 1));
+  const hFull = kind === "pine" ? 0.5 : kind === "birch" ? 0.62 : kind === "round" ? 0.42 : 0.46;
+  const h = H * (0.09 + (hFull - 0.09) * tg);
+  const tw = H * (kind === "birch" ? 0.038 : 0.06) * (0.25 + 0.75 * tg);
+  const tx = (lean + sway) * h;
+
+  // trunk
+  c.fillStyle = kind === "birch" ? P.birch : P.bark;
+  c.beginPath(); c.moveTo(-tw / 2, 0);
+  c.quadraticCurveTo(-tw * 0.3, -h * 0.5, tx - tw * 0.22, -h);
+  c.lineTo(tx + tw * 0.22, -h);
+  c.quadraticCurveTo(tw * 0.3, -h * 0.5, tw / 2, 0); c.closePath(); c.fill();
+  if (kind === "birch" && tg > 0.3) { c.fillStyle = mix(P.bark, dark, 0.3);
+    for (let i = 1; i < 6; i++) { const yy = -h * i / 6.5; c.fillRect(-tw * 0.35 + tx * i / 6.5, yy, tw * 0.45, Math.max(1, H * 0.004)); } }
+
+  if (kind === "pine") {
+    for (let k = 0; k < 4; k++) {
+      const e = ease(seg(g, 0.18 + k * 0.16, 0.48 + k * 0.16)); if (e <= 0) continue;
+      const W = H * 0.2 * (1 - k * 0.17) * e, by = -h * (0.22 + k * 0.21), th = H * 0.2 * (0.6 + 0.4 * e) * e;
+      const ox = tx * (0.3 + k * 0.22);
+      c.fillStyle = mix(P.pine, dark, 0.25 - k * 0.06);
+      c.beginPath(); c.moveTo(ox - W, by); c.lineTo(ox + W, by); c.lineTo(ox + sway * H * 0.3, by - th); c.closePath(); c.fill();
+      c.fillStyle = mix(P.pine, light, 0.12);
+      c.beginPath(); c.moveTo(ox - W, by); c.lineTo(ox - W * 0.1, by); c.lineTo(ox + sway * H * 0.3, by - th); c.closePath(); c.fill();
+    }
+    c.restore(); return;
+  }
+
+  // branches peeking through
+  if (tg > 0.25 && kind !== "round") {
+    c.strokeStyle = kind === "birch" ? P.birch : P.bark; c.lineCap = "round"; c.lineWidth = Math.max(1, tw * 0.35);
+    for (const d of [-1, 1]) { const by = -h * (0.55 + d * 0.06); const L = H * 0.12 * tg;
+      c.beginPath(); c.moveTo(tx * 0.55, by); c.quadraticCurveTo(tx * 0.55 + d * L * 0.6, by - L * 0.2, tx + d * L, by - L * 0.7); c.stroke(); }
+  }
+  if (cg <= 0) { c.restore(); return; }
+
+  const R = H * (kind === "round" ? 0.22 : kind === "birch" ? 0.17 : 0.26) * cg;
+  const cx = tx, cy = -h - R * (kind === "birch" ? 0.1 : 0.35);
+  const lc = kind === "birch" ? mix(P.leaves[3], light, 0.12) : leaf;
+  if (kind === "round") {
+    c.fillStyle = mix(lc, dark, 0.3); c.beginPath(); c.arc(cx + R * 0.08, cy + R * 0.08, R, 0, Math.PI * 2); c.fill();
+    c.fillStyle = lc; c.beginPath(); c.arc(cx, cy, R * 0.94, 0, Math.PI * 2); c.fill();
+    c.fillStyle = mix(lc, light, 0.25); c.beginPath(); c.arc(cx - R * 0.3, cy - R * 0.32, R * 0.42, 0, Math.PI * 2); c.fill();
+    c.restore(); return;
+  }
+  const sy = kind === "birch" ? 1.5 : 0.75; // birch crowns are tall
+  const layer = (col, off, scale, count) => { c.fillStyle = col;
+    for (let i = 0; i < count; i++) { const [a, d1, d2, d3] = blobs[i];
+      const ox = Math.cos(a) * R * 0.62 * d1, oy = Math.sin(a) * R * 0.5 * sy * d2, br = R * (0.42 + 0.28 * d3) * scale;
+      c.beginPath(); c.arc(cx + ox + off.x, cy + oy + off.y, br, 0, Math.PI * 2); c.fill(); } };
+  layer(mix(lc, dark, 0.35), { x: R * 0.08, y: R * 0.1 }, 1, 11);
+  layer(lc, { x: 0, y: 0 }, 0.92, 11);
+  layer(mix(lc, light, 0.22), { x: -R * 0.16, y: -R * 0.2 }, 0.45, 6);
+  c.restore();
+}
+
+/* ---------- scene ---------- */
+const cv = $("cv"), ctx = cv.getContext("2d"), bg = document.createElement("canvas"), bctx = bg.getContext("2d");
+let W = 0, H = 0, DPR = 1;
+function geom() { const horizon = H * 0.5; return { horizon, S: Math.min(H, W * 0.95), baseY: H * 0.93 }; }
+function place(i) {
+  const r = rng(i * 7919 + 13), { horizon, S } = geom();
+  const d = Math.pow(r(), 0.85);
+  let x = r() * W;
+  return { x, y: horizon + H * 0.04 + d * H * 0.3, h: S * (0.08 + 0.13 * d) };
+}
+function hill(c, y0, amp, freq, phase, col) {
+  c.fillStyle = col; c.beginPath(); c.moveTo(0, H);
+  for (let x = 0; x <= W; x += 8) c.lineTo(x, y0 - amp * (Math.sin(x / W * freq + phase) * 0.6 + Math.sin(x / W * freq * 2.3 + phase * 1.7) * 0.4));
+  c.lineTo(W, H); c.closePath(); c.fill();
+}
+function renderBg() {
+  readPalette();
+  const c = bctx; c.setTransform(DPR, 0, 0, DPR, 0, 0);
+  const { horizon } = geom();
+  const sky = c.createLinearGradient(0, 0, 0, horizon); sky.addColorStop(0, P.skyTop); sky.addColorStop(1, P.skyBot);
+  c.fillStyle = sky; c.fillRect(0, 0, W, H);
+  if (P.night) { const r = rng(42); c.fillStyle = P.orb;
+    for (let i = 0; i < 90; i++) { c.globalAlpha = 0.3 + r() * 0.6; c.fillRect(r() * W, r() * horizon * 0.9, 1.4, 1.4); } c.globalAlpha = 1; }
+  const ox = W * 0.8, oy = horizon * 0.32, orr = Math.min(W, H) * 0.05;
+  c.fillStyle = P.orb; c.globalAlpha = 0.25; c.beginPath(); c.arc(ox, oy, orr * 1.8, 0, Math.PI * 2); c.fill();
+  c.globalAlpha = 1; c.beginPath(); c.arc(ox, oy, orr, 0, Math.PI * 2); c.fill();
+  hill(c, horizon - H * 0.02, H * 0.05, 5, 1.2, P.hillFar);
+  hill(c, horizon + H * 0.02, H * 0.035, 3.3, 4.1, P.hillNear);
+  const fy = horizon + H * 0.035;
+  const field = c.createLinearGradient(0, fy, 0, H); field.addColorStop(0, P.fieldTop); field.addColorStop(1, P.fieldBot);
+  c.fillStyle = field; c.beginPath(); c.moveTo(0, H);
+  for (let x = 0; x <= W; x += 10) c.lineTo(x, fy + Math.sin(x / W * 4 + 0.6) * H * 0.008);
+  c.lineTo(W, H); c.closePath(); c.fill();
+  // grove
+  const trees = store.trees.map((t, i) => ({ i, ...place(i) })).sort((a, b) => a.y - b.y);
+  for (const t of trees) {
+    c.fillStyle = "rgba(0,0,0,.12)"; c.beginPath(); c.ellipse(t.x, t.y, t.h * 0.14, t.h * 0.025, 0, 0, Math.PI * 2); c.fill();
+    drawTree(c, t.x, t.y, t.h, 1, seedFor(t.i), 0);
+  }
+}
+function resize() {
+  const r = $("scene").getBoundingClientRect();
+  DPR = Math.min(2, window.devicePixelRatio || 1); W = Math.max(1, r.width); H = Math.max(1, r.height);
+  for (const k of [cv, bg]) { k.width = Math.round(W * DPR); k.height = Math.round(H * DPR); }
+  renderBg(); draw();
+}
+let pulse = 0;
+function draw(now) {
+  now = now || performance.now();
+  ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.drawImage(bg, 0, 0);
+  ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+  const { S, baseY } = geom(), x = W / 2, TH = S * 0.62;
+  const e = elapsed(), g = e === 0 ? 0.03 : Math.max(0.03, (e % TREE_MS) / TREE_MS);
+  ctx.fillStyle = P.soil; ctx.beginPath(); ctx.ellipse(x, baseY + S * 0.01, S * 0.12, S * 0.022, 0, 0, Math.PI * 2); ctx.fill();
+  ctx.fillStyle = "rgba(0,0,0,.18)"; ctx.beginPath(); ctx.ellipse(x, baseY + S * 0.004, S * 0.07, S * 0.01, 0, 0, Math.PI * 2); ctx.fill();
+  const sway = running && !reduceMotion ? Math.sin(now / 1700) * 0.012 : 0;
+  if (pulse > 0) { ctx.globalAlpha = pulse * 0.35; ctx.fillStyle = P.orb;
+    ctx.beginPath(); ctx.arc(x, baseY - TH * 0.4, TH * 0.6 * (1.4 - pulse * 0.4), 0, Math.PI * 2); ctx.fill(); ctx.globalAlpha = 1; pulse = Math.max(0, pulse - 0.012); }
+  drawTree(ctx, x, baseY, TH, g, seedFor(store.trees.length), sway);
+}
+const reduceMotion = matchMedia("(prefers-reduced-motion: reduce)").matches;
+let rafOn = false;
+function loop(t) { draw(t); if (running || pulse > 0) requestAnimationFrame(loop); else rafOn = false; }
+function kick() { if (!rafOn) { rafOn = true; requestAnimationFrame(loop); } }
+
+/* ---------- audio (all generated, works offline) ---------- */
+const Sound = (() => {
+  let ac, master, bus = null, timers = [], nodes = [];
+  function ensure() {
+    if (!ac) { ac = new (window.AudioContext || window.webkitAudioContext)(); master = ac.createGain(); master.connect(ac.destination); setVol(store.vol); }
+    if (ac.state === "suspended") ac.resume();
+  }
+  function setVol(v) { if (master) master.gain.setTargetAtTime(Math.pow(v / 100, 1.6) * 0.9, ac.currentTime, 0.1); }
+  const bufs = {};
+  function noise(type) {
+    if (bufs[type]) return bufs[type];
+    const len = ac.sampleRate * 6, b = ac.createBuffer(2, len, ac.sampleRate);
+    for (let ch = 0; ch < 2; ch++) { const d = b.getChannelData(ch); let l = 0, b0 = 0, b1 = 0, b2 = 0, b3 = 0, b4 = 0, b5 = 0, b6 = 0;
+      for (let i = 0; i < len; i++) { const w = Math.random() * 2 - 1;
+        if (type === "brown") { l = (l + 0.02 * w) / 1.02; d[i] = l * 3.5; }
+        else if (type === "pink") { b0 = 0.99886 * b0 + w * 0.0555179; b1 = 0.99332 * b1 + w * 0.0750759; b2 = 0.969 * b2 + w * 0.153852;
+          b3 = 0.8665 * b3 + w * 0.3104856; b4 = 0.55 * b4 + w * 0.5329522; b5 = -0.7616 * b5 - w * 0.016898;
+          d[i] = (b0 + b1 + b2 + b3 + b4 + b5 + b6 + w * 0.5362) * 0.11; b6 = w * 0.115926; }
+        else d[i] = w; } }
+    return bufs[type] = b;
+  }
+  function src(type) { const s = ac.createBufferSource(); s.buffer = noise(type); s.loop = true; s.start(ac.currentTime, Math.random() * 5); nodes.push(s); return s; }
+  function filt(t, f, q) { const n = ac.createBiquadFilter(); n.type = t; n.frequency.value = f; if (q) n.Q.value = q; return n; }
+  function gain(v) { const n = ac.createGain(); n.gain.value = v; return n; }
+  function chain(...n) { for (let i = 0; i < n.length - 1; i++) n[i].connect(n[i + 1]); return n[n.length - 1]; }
+  function every(fn, min, max) { const go = () => { fn(); timers.push(setTimeout(go, min + Math.random() * (max - min))); }; timers.push(setTimeout(go, min)); }
+
+  const build = {
+    rain(out) {
+      chain(src("pink"), filt("highpass", 450), filt("lowpass", 7000), gain(0.75), out);
+      chain(src("brown"), filt("lowpass", 280), gain(0.5), out);
+      every(() => { const t = ac.currentTime, s = ac.createBufferSource(); s.buffer = noise("white");
+        const f = filt("bandpass", 1800 + Math.random() * 4500, 6), g = gain(0), p = ac.createStereoPanner(); p.pan.value = Math.random() * 1.6 - 0.8;
+        g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(0.25 + Math.random() * 0.3, t + 0.004); g.gain.exponentialRampToValueAtTime(0.0001, t + 0.05);
+        chain(s, f, g, p, out); s.start(t, Math.random() * 5); s.stop(t + 0.08); }, 30, 160);
+    },
+    brown(out) { chain(src("brown"), filt("lowpass", 900), gain(0.9), out); },
+    forest(out) {
+      const wind = gain(0.35); chain(src("pink"), filt("bandpass", 520, 0.6), wind, out);
+      const lfo = ac.createOscillator(), lg = gain(0.22); lfo.frequency.value = 0.07; lfo.connect(lg).connect(wind.gain); lfo.start(); nodes.push(lfo);
+      chain(src("brown"), filt("lowpass", 380), gain(0.35), out);
+      every(() => { const t0 = ac.currentTime, n = 2 + Math.floor(Math.random() * 4), f0 = 2400 + Math.random() * 2200, p = ac.createStereoPanner();
+        p.pan.value = Math.random() * 1.8 - 0.9; p.connect(out);
+        for (let k = 0; k < n; k++) { const t = t0 + k * (0.11 + Math.random() * 0.06), o = ac.createOscillator(), g = gain(0);
+          o.type = "sine"; o.frequency.setValueAtTime(f0 * (1 + k * 0.04), t); o.frequency.exponentialRampToValueAtTime(f0 * (1.25 + Math.random() * 0.2), t + 0.07);
+          g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(0.06, t + 0.015); g.gain.exponentialRampToValueAtTime(0.0001, t + 0.09);
+          o.connect(g).connect(p); o.start(t); o.stop(t + 0.12); } }, 1800, 6500);
+    },
+    pad(out) {
+      const chords = [[130.81, 196, 246.94, 293.66, 329.63], [110, 164.81, 196, 246.94, 261.63], [87.31, 130.81, 164.81, 196, 220], [98, 146.83, 220, 246.94, 329.63]];
+      const lp = filt("lowpass", 1100, 0.4), trem = gain(1); chain(lp, trem, out);
+      const tl = ac.createOscillator(), tg = gain(0.12); tl.frequency.value = 0.18; tl.connect(tg).connect(trem.gain); tl.start(); nodes.push(tl);
+      const oscs = chords[0].map(f => [-4, 4].map(det => { const o = ac.createOscillator(); o.type = "triangle"; o.frequency.value = f; o.detune.value = det;
+        o.connect(gain(0.045)).connect(lp); o.start(); nodes.push(o); return o; }));
+      let k = 0; every(() => { k = (k + 1) % chords.length; const t = ac.currentTime; oscs.forEach((pair, i) => pair.forEach(o => o.frequency.setTargetAtTime(chords[k][i], t, 1.2))); }, 9000, 9000);
+      chain(src("pink"), filt("highpass", 2500), gain(0.04), out);
+    }
+  };
+  function stopBus() {
+    timers.forEach(clearTimeout); timers = [];
+    if (bus) { const b = bus, ns = nodes; b.gain.setTargetAtTime(0, ac.currentTime, 0.4);
+      setTimeout(() => { ns.forEach(n => { try { n.stop(); } catch (e) {} }); try { b.disconnect(); } catch (e) {} }, 2000); }
+    bus = null; nodes = [];
+  }
+  function play(kind) {
+    ensure(); stopBus(); if (kind === "off") return;
+    bus = gain(0); bus.connect(master); build[kind](bus); bus.gain.setTargetAtTime(1, ac.currentTime, 0.8);
+  }
+  function chime() {
+    ensure(); const t = ac.currentTime, out = gain(0.5); out.connect(master);
+    [[659.25, 1], [987.77, 0.5], [1318.5, 0.3], [1818, 0.15]].forEach(([f, a], i) => { const o = ac.createOscillator(), g = gain(0);
+      o.frequency.value = f; g.gain.setValueAtTime(0.0001, t + i * 0.09); g.gain.exponentialRampToValueAtTime(0.3 * a, t + i * 0.09 + 0.01);
+      g.gain.exponentialRampToValueAtTime(0.0001, t + i * 0.09 + 2.6); o.connect(g).connect(out); o.start(t + i * 0.09); o.stop(t + 3); });
+  }
+  return { play, stop: stopBus, chime, setVol, ensure };
+})();
+
+/* ---------- timer ---------- */
+let running = false, before = 0, startedAt = 0, grownThisSession = 0, wake = null;
+const elapsed = () => before + (running ? Date.now() - startedAt : 0);
+let sound = store.sound || "rain";
+
+function start() {
+  Sound.ensure(); running = true; startedAt = Date.now();
+  Sound.play(sound); $("hint").hidden = true;
+  try { navigator.wakeLock && navigator.wakeLock.request("screen").then(w => wake = w).catch(() => {}); } catch (e) {}
+  ui(); kick();
+}
+function pause() {
+  before = elapsed(); running = false; Sound.stop();
+  if (wake) { wake.release().catch(() => {}); wake = null; }
+  ui(); draw();
+}
+function end() {
+  if (running) pause();
+  const n = grownThisSession;
+  before = 0; grownThisSession = 0; $("hint").hidden = false;
+  $("hint").textContent = n ? `Session done: ${n} new ${n === 1 ? "tree" : "trees"} in your grove. Press Start for another.` : "Press Start. A tree grows for every 10 minutes you stay with it.";
+  ui(); draw();
+}
+function grow() {
+  store.trees.push({ at: Date.now() }); save(); grownThisSession++;
+  renderBg(); pulse = 1; kick(); Sound.chime();
+  toast(`Tree ${store.trees.length} has grown. ${grownThisSession > 1 ? grownThisSession + " this session." : "Keep going."}`);
+  stats();
+}
+let toastT;
+function toast(msg) { const t = $("toast"); t.textContent = msg; t.classList.add("show"); clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove("show"), 4200); }
+
+function stats() {
+  const today = new Date().toDateString();
+  $("statToday").textContent = store.trees.filter(t => new Date(t.at).toDateString() === today).length;
+  $("statGrove").textContent = store.trees.length;
+  const mins = store.trees.length * TREE_MS / 60000;
+  $("statHours").textContent = DEMO ? `${store.trees.length}×` : `${Math.floor(mins / 60)}h ${Math.round(mins % 60)}m`;
+}
+function ui() {
+  const e = elapsed();
+  $("startBtn").textContent = running ? "Pause" : e > 0 ? "Resume" : "Start";
+  $("endBtn").hidden = e === 0;
+}
+function tick() {
+  const e = elapsed();
+  while (Math.floor(e / TREE_MS) > grownThisSession) grow();
+  const into = e % TREE_MS, left = TREE_MS - into;
+  $("time").textContent = fmt(e);
+  $("nextTxt").textContent = (grownThisSession === 0 ? "First tree in " : "Next tree in ") + fmt(left + 999);
+  $("bar").style.width = (into / TREE_MS * 100).toFixed(2) + "%";
+  document.title = running ? `${fmt(e)} · Ten-Minute Grove` : "Ten-Minute Grove";
+}
+setInterval(tick, 250);
+
+/* ---------- controls ---------- */
+$("startBtn").addEventListener("click", () => running ? pause() : start());
+$("endBtn").addEventListener("click", end);
+document.addEventListener("keydown", ev => {
+  if (ev.code === "Space" && !/BUTTON|INPUT/.test(ev.target.tagName)) { ev.preventDefault(); running ? pause() : start(); }
+});
+function setChips() { document.querySelectorAll(".chip").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.s === sound))); }
+$("chips").addEventListener("click", ev => {
+  const b = ev.target.closest(".chip"); if (!b) return;
+  sound = b.dataset.s; store.sound = sound; save(); setChips();
+  if (running) Sound.play(sound);
+});
+const vol = $("vol"); vol.value = store.vol ?? 55;
+vol.addEventListener("input", () => { store.vol = +vol.value; Sound.setVol(store.vol); save(); });
+$("clearBtn").addEventListener("click", () => { $("confirmClear").hidden = !$("confirmClear").hidden; });
+$("confirmClear").addEventListener("click", () => { store.trees = []; save(); $("confirmClear").hidden = true; renderBg(); draw(); stats(); toast("Grove cleared."); });
+
+/* ---------- theme + size ---------- */
+new ResizeObserver(resize).observe($("scene"));
+matchMedia("(prefers-color-scheme: dark)").addEventListener("change", () => { renderBg(); draw(); });
+new MutationObserver(() => { renderBg(); draw(); }).observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
+
+setChips(); stats(); ui(); tick(); resize();
+})();
+</script>
